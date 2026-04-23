@@ -1441,7 +1441,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
     getFirestore, collection, addDoc, getDocs,
     deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, setDoc
@@ -1467,7 +1467,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // ─── INIT ───
   function initFirebase() {
     try {
-      app = initializeApp(firebaseConfig);
+      // Safe init - avoid double initialization
+      app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
       db = getFirestore(app);
       document.getElementById('liveStatus').textContent = 'Live';
       document.getElementById('configBanner').style.display = 'none';
