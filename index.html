@@ -420,7 +420,8 @@
     body { background: #fff !important; color: #000 !important; }
     body::before { display: none; }
     header, .tabs-bar, .stats-row, #filterBar, .scroll-hint,
-    #installBanner, #toast, .modal-overlay, #exportBtn { display: none !important; }
+    #installBanner, #toast, .modal-overlay, #exportBtn,
+    #panel-projects, #sortBar { display: none !important; }
     .tab-panel { display: block !important; }
     #panel-add { display: none !important; }
     #panel-view { display: block !important; }
@@ -759,17 +760,86 @@
   @media (max-width: 480px) {
     .form-grid { grid-template-columns: 1fr; }
   }
+
+  /* ── LOGIN ── */
+  #loginScreen {
+    position:fixed;inset:0;display:flex;align-items:center;
+    justify-content:center;z-index:9999;padding:24px;background:var(--bg);
+  }
+  .login-box {
+    background:var(--card);border:1px solid var(--border2);
+    border-radius:16px;padding:36px 32px;width:100%;max-width:380px;
+    animation:fadeIn 0.4s ease;
+  }
+  .login-logo{text-align:center;margin-bottom:20px;}
+  .login-title{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;}
+  .login-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:24px;}
+  .login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  .login-field label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;}
+  .login-field input{
+    background:var(--bg3);border:1px solid var(--border2);border-radius:8px;
+    padding:11px 14px;color:var(--text);font-family:var(--font);font-size:14px;
+    outline:none;transition:border-color 0.2s,box-shadow 0.2s;text-align:left;direction:ltr;
+  }
+  .login-field input:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(0,119,255,0.15);}
+  .btn-login{
+    width:100%;background:linear-gradient(135deg,var(--accent2),var(--accent));
+    color:#000;border:none;border-radius:8px;padding:12px;
+    font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;
+  }
+  .btn-login:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,194,255,0.3);}
+  .login-error{color:var(--danger);font-size:12px;text-align:center;margin-top:10px;min-height:18px;}
+  .user-chip{display:flex;align-items:center;gap:8px;background:var(--bg3);
+    border:1px solid var(--border2);border-radius:20px;padding:4px 12px 4px 6px;}
+  .user-avatar-sm{width:26px;height:26px;background:linear-gradient(135deg,var(--accent2),var(--accent));
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:700;color:#000;flex-shrink:0;}
+  .user-role-badge{font-size:10px;color:var(--text3);font-family:var(--mono);
+    background:var(--bg);border-radius:4px;padding:1px 6px;border:1px solid var(--border);}
+  .btn-logout{background:transparent;border:1px solid var(--border2);color:var(--text2);
+    border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(--font);transition:all 0.2s;}
+  .btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+
+  .tags-input-box {
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    background:var(--bg3);border:1px solid var(--border2);
+    border-radius:8px;padding:7px 10px;min-height:38px;
+  }
+  .tag-bare-input {
+    background:none;border:none;outline:none;font-size:13px;
+    color:var(--text);min-width:100px;flex:1;font-family:var(--font);
+  }
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><span class="logo-badge">AV\NASSIF</span></div>
+    <div class="login-title">Project Manager</div>
+    <div class="login-sub">Sign in to continue</div>
+    <div class="login-field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="username" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="password" autocomplete="current-password">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<div id="appShell" style="display:none">
 <!-- HEADER -->
 <header>
   <div class="logo">
     <span class="logo-badge">AV\NASSIF</span>
     <span class="logo-text">Project Manager</span>
   </div>
-  <div class="header-right">
+  <div class="header-right" style="display:flex;align-items:center;gap:10px;">
     <div class="theme-toggle">
       <span>🌙</span>
       <label class="toggle-switch">
@@ -780,6 +850,12 @@
       <span>☀️</span>
     </div>
     <div class="live-dot" id="liveStatus">Connecting...</div>
+    <div class="user-chip" id="userChip" style="display:none">
+      <div class="user-avatar-sm" id="headerAvatar">?</div>
+      <span style="font-size:12px;font-weight:500" id="headerName">—</span>
+      <span class="user-role-badge" id="headerRole">—</span>
+    </div>
+    <button class="btn-logout" id="logoutBtn" style="display:none" onclick="doLogout()">Sign out</button>
   </div>
 </header>
 
@@ -793,6 +869,9 @@
   </button>
   <button class="tab-btn" onclick="switchTab('view')" id="tab-view">
     <span class="tab-icon">◎</span> View Projects
+  </button>
+  <button class="tab-btn" onclick="switchTab('haraka')" id="tab-haraka" style="display:none">
+    <span class="tab-icon">🚀</span> الحركة
   </button>
 </div>
 
@@ -812,15 +891,23 @@
         <span class="label">Registered Projects</span>
         <span class="count-badge" id="countBadgeProjects">0</span>
       </div>
-      <div class="table-scroll"><table>
+      <div class="table-scroll"><table style="min-width:700px;table-layout:fixed;width:100%;">
+        <colgroup>
+          <col style="width:50px">
+          <col style="width:160px">
+          <col style="width:220px">
+          <col style="width:160px">
+          <col style="width:140px">
+          <col style="width:140px">
+        </colgroup>
         <thead>
           <tr>
-            <th>#</th>
+            <th style="text-align:center">#</th>
             <th>Project No.</th>
             <th>Project Name</th>
             <th>Site Engineer</th>
             <th>Location</th>
-            <th>Actions</th>
+            <th style="text-align:center">Actions</th>
           </tr>
         </thead>
         <tbody id="projectsTableBody">
@@ -994,7 +1081,7 @@
       <div id="filterLabel" style="font-size:13px;color:var(--accent);font-family:var(--mono);margin-right:auto;"></div>
     </div>
 
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+    <div id="sortBar" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
       <span style="font-size:12px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;">Sort:</span>
       <button id="sortDayBtn" onclick="setSortMode('day')" class="btn btn-ghost" style="padding:7px 14px;font-size:12px;">📅 Sort by Day</button>
       <button id="sortCreatedBtn" onclick="setSortMode('created')" class="btn btn-ghost" style="padding:7px 14px;font-size:12px;">🕐 Sort by Created</button>
@@ -1065,6 +1152,107 @@
     </div>
 
   </div>
+
+  <!-- ─── HARAKA TAB ─── -->
+  <div class="tab-panel" id="panel-haraka">
+
+    <!-- Admin write panel -->
+    <div id="harakaAdminPanel" style="display:none;margin-bottom:24px;">
+      <div class="form-card">
+        <div class="form-card-title">▸ Add Entry</div>
+
+        <div class="form-grid">
+          <div class="field"><label>🏗️ Project Name</label>
+            <input type="text" id="h_project" placeholder="Project name"></div>
+          <div class="field"><label>Project Number</label>
+            <input type="text" id="h_number" placeholder="A2XXX" oninput="hAutoFill()"></div>
+          <div class="field"><label>🚘 Transportation</label>
+            <select id="h_car">
+              <option value="مواصلات">🚌 مواصلات</option>
+              <option value="Sedan">🚗 Sedan</option>
+              <option value="Van">🚐 Van</option>
+              <option value="ايجار">🚕 إيجار</option>
+              <option value="شركة">🏢 شركة</option>
+            </select></div>
+          <div class="field"><label>Car Detail</label>
+            <input type="text" id="h_car_detail" placeholder="Driver / plate"></div>
+        </div>
+
+        <div class="field" style="margin-bottom:12px;">
+          <label>👨‍💻 Engineers (م)</label>
+          <div id="h_eng_wrap" class="tags-input-box">
+            <input type="text" id="h_eng_input" class="tag-bare-input" placeholder="Name + Enter" onkeydown="hAddPerson(event,'eng')">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:12px;">
+          <label>👷 Technicians</label>
+          <div id="h_tech_wrap" class="tags-input-box">
+            <input type="text" id="h_tech_input" class="tag-bare-input" placeholder="Name + Enter" onkeydown="hAddPerson(event,'tech')">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:12px;">
+          <label>▪️ Tasks</label>
+          <div id="h_tasks_wrap"></div>
+          <button onclick="hAddTask()" class="btn btn-ghost" style="width:100%;margin-top:6px;border-style:dashed;color:var(--text3)">+ Add task</button>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-ghost" onclick="hClearEntry()">Clear</button>
+          <button class="btn btn-primary" onclick="hAddEntry()">+ Add to List</button>
+        </div>
+      </div>
+
+      <div id="h_pendingList"></div>
+
+      <!-- Special sections -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px;">
+        <div class="form-card" style="padding:14px;">
+          <div class="form-card-title" style="margin-bottom:8px;">🏢 Office</div>
+          <div id="h_office_wrap" class="tags-input-box">
+            <input type="text" id="h_office_input" class="tag-bare-input" placeholder="Name + Enter" onkeydown="hAddPerson(event,'office')">
+          </div>
+        </div>
+        <div class="form-card" style="padding:14px;">
+          <div class="form-card-title" style="margin-bottom:8px;">😴 Annual Leave</div>
+          <div id="h_vacation_wrap" class="tags-input-box">
+            <input type="text" id="h_vacation_input" class="tag-bare-input" placeholder="Name + Enter" onkeydown="hAddPerson(event,'vacation')">
+          </div>
+        </div>
+        <div class="form-card" style="padding:14px;">
+          <div class="form-card-title" style="margin-bottom:8px;">🤒 Sick Leave</div>
+          <div id="h_sick_wrap" class="tags-input-box">
+            <input type="text" id="h_sick_input" class="tag-bare-input" placeholder="Name + Enter" onkeydown="hAddPerson(event,'sick')">
+          </div>
+        </div>
+      </div>
+
+      <button onclick="hPublish()" class="btn btn-primary" style="width:100%;padding:13px;font-size:14px;background:linear-gradient(135deg,#00c27a,#00e5a0);">
+        ✅ Publish Haraka
+      </button>
+    </div>
+
+    <!-- Date nav -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+      <span style="font-size:12px;color:var(--text2);font-family:var(--mono);">📅 Viewing:</span>
+      <input type="date" id="h_viewDate" onchange="hLoadDay()"
+        style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;
+        padding:7px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;">
+      <button onclick="hGoToday()" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;color:var(--accent);border-color:rgba(0,194,255,0.3);">Today</button>
+    </div>
+
+    <!-- Day title -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:12px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Daily Movement</div>
+      <div id="h_dayTitle" style="font-size:26px;font-weight:700;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">—</div>
+    </div>
+
+    <!-- Feed -->
+    <div id="h_feed">
+      <div class="empty-state"><div class="empty-icon">📋</div><p>Loading...</p></div>
+    </div>
+
+  </div>
+
 
 </main>
 
@@ -1176,6 +1364,82 @@
 <!-- ─────────────────────────────────────────
      FIREBASE + APP LOGIC
      ───────────────────────────────────────── -->
+<script>
+// ── USERS ──
+var USERS = {
+  'admin':  { password: 'av2025',    role: 'admin',   display: 'Admin' },
+  'nassif': { password: 'nassif123', role: 'admin',   display: 'Nassif Victor' }
+};
+
+function doLogin() {
+  var u = document.getElementById('loginUser').value.trim().toLowerCase();
+  var p = document.getElementById('loginPass').value;
+  var err = document.getElementById('loginError');
+  var found = USERS[u];
+  if (!found || found.password !== p) { err.textContent = 'Wrong username or password'; return; }
+  err.textContent = '';
+  window._currentUser = { key: u, role: found.role, display: found.display };
+  // Show app
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  // Header
+  document.getElementById('userChip').style.display = 'flex';
+  document.getElementById('logoutBtn').style.display = 'block';
+  var av = found.display.trim().split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+  document.getElementById('headerAvatar').textContent = av;
+  document.getElementById('headerName').textContent = found.display;
+  document.getElementById('headerRole').textContent = found.role;
+  // Show tabs by role
+  applyRoleUI(found.role);
+  // Fire event for module
+  window.dispatchEvent(new CustomEvent('avUserLogin', { detail: window._currentUser }));
+}
+
+function doLogout() {
+  window._currentUser = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('userChip').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = 'none';
+}
+
+function applyRoleUI(role) {
+  var tabs = ['tab-projects','tab-add','tab-view','tab-haraka'];
+  tabs.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+  if (role === 'admin') {
+    ['tab-projects','tab-add','tab-view','tab-haraka'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.style.display='';
+    });
+    var ha = document.getElementById('harakaAdminPanel');
+    if (ha) ha.style.display = 'block';
+    // default tab after module loads
+    waitForSwitchTab('add');
+  } else if (role === 'engineer') {
+    ['tab-projects','tab-add','tab-view','tab-haraka'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.style.display='';
+    });
+    waitForSwitchTab('view');
+  } else {
+    var el = document.getElementById('tab-haraka'); if(el) el.style.display='';
+    waitForSwitchTab('haraka');
+  }
+}
+
+function waitForSwitchTab(tab) {
+  if (window.switchTab) { window.switchTab(tab); }
+  else { setTimeout(function(){ waitForSwitchTab(tab); }, 100); }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var lp = document.getElementById('loginPass');
+  var lu = document.getElementById('loginUser');
+  if (lp) lp.onkeydown = function(e){ if(e.key==='Enter') doLogin(); };
+  if (lu) lu.onkeydown = function(e){ if(e.key==='Enter') lp && lp.focus(); };
+});
+</script>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
@@ -1209,6 +1473,21 @@
       document.getElementById('configBanner').style.display = 'none';
       startListener();
       startRegistryListener();
+
+      // Init haraka
+      hInitDate();
+      const hInp = document.getElementById('h_viewDate');
+      if (hInp) { hInp.value = getTodayStr(); hLoadDay(); }
+      ['eng','tech','office','vacation','sick'].forEach(t => { try { hRenderTags(t); } catch(e){} });
+
+      // Cleanup haraka older than 2 months
+      (async () => {
+        try {
+          const cutoff = (() => { const d=new Date(); d.setMonth(d.getMonth()-2); return d.toISOString().split('T')[0]; })();
+          const snap = await getDocs(collection(db, 'haraka'));
+          snap.forEach(async d => { if (d.id < cutoff) await deleteDoc(doc(db,'haraka',d.id)); });
+        } catch(e) {}
+      })();
     } catch (e) {
       document.getElementById('liveStatus').textContent = 'Not Connected';
       document.getElementById('liveStatus').style.color = 'var(--danger)';
@@ -1669,12 +1948,12 @@
     }
     tbody.innerHTML = projectRegistry.map((p, i) => `
       <tr>
-        <td style="color:var(--text3);font-family:var(--mono);font-size:12px">${i+1}</td>
-        <td><span class="project-num">${esc(p.number)}</span></td>
-        <td><span class="project-name">${esc(p.name)}</span></td>
-        <td><span class="engineer-chip"><span class="engineer-avatar">${initials(p.engineer)}</span>${esc(p.engineer)}</span></td>
-        <td><span class="location-tag">📍 ${esc(p.location)}</span></td>
-        <td><div class="actions-cell">
+        <td style="color:var(--text3);font-family:var(--mono);font-size:12px;text-align:center">${i+1}</td>
+        <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="project-num">${esc(p.number)}</span></td>
+        <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="project-name">${esc(p.name)}</span></td>
+        <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="engineer-chip"><span class="engineer-avatar">${initials(p.engineer)}</span>${esc(p.engineer)}</span></td>
+        <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="location-tag">📍 ${esc(p.location)}</span></td>
+        <td style="text-align:center"><div class="actions-cell" style="justify-content:center">
           <button class="btn btn-edit-ghost" onclick="openEditProjectModal('${p.id}')">✏️ Edit</button>
           <button class="btn btn-danger-ghost" onclick="deleteProjectRegistry('${p.id}')">🗑</button>
         </div></td>
@@ -1763,7 +2042,200 @@
     }
   };
 
-  initFirebase();
+
+  // ══════════════════════════════════════
+  // HARAKA
+  // ══════════════════════════════════════
+  let h_viewDate = getTodayStr();
+  let h_pending  = [];
+  let h_lists    = { eng:[], tech:[], office:[], vacation:[], sick:[] };
+
+  function hFmtDateAr(str) {
+    if (!str) return '';
+    const parts = str.split('-');
+    const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const d = new Date(str + 'T00:00:00');
+    return 'يوم ' + days[d.getDay()] + ' الموافق ' + parts[2]+'/'+parts[1]+'/'+parts[0];
+  }
+
+  function hInitDate() {
+    const inp = document.getElementById('h_viewDate');
+    if (inp) inp.value = h_viewDate;
+    const title = document.getElementById('h_dayTitle');
+    if (title) title.textContent = hFmtDateAr(h_viewDate);
+  }
+
+  window.hGoToday = function() {
+    h_viewDate = getTodayStr();
+    document.getElementById('h_viewDate').value = h_viewDate;
+    document.getElementById('h_dayTitle').textContent = hFmtDateAr(h_viewDate);
+    hLoadDay();
+  };
+
+  window.hLoadDay = function() {
+    h_viewDate = document.getElementById('h_viewDate').value;
+    document.getElementById('h_dayTitle').textContent = hFmtDateAr(h_viewDate);
+    if (!db) return;
+    onSnapshot(doc(db, 'haraka', h_viewDate), (snap) => {
+      hRenderFeed(snap.exists() ? snap.data() : null);
+    });
+  };
+
+  window.hAutoFill = function() {
+    const num = document.getElementById('h_number').value.trim();
+    const match = projectRegistry.find(p => p.number.toLowerCase() === num.toLowerCase());
+    if (match) { document.getElementById('h_project').value = match.name || ''; toast('Auto-filled', 'success'); }
+  };
+
+  window.hAddPerson = function(e, type) {
+    if (e.key !== 'Enter') return;
+    const inputId = { eng:'h_eng_input', tech:'h_tech_input', office:'h_office_input', vacation:'h_vacation_input', sick:'h_sick_input' }[type];
+    const val = document.getElementById(inputId).value.trim();
+    if (!val) return;
+    h_lists[type].push(val);
+    document.getElementById(inputId).value = '';
+    hRenderTags(type);
+    e.preventDefault();
+  };
+
+  function hRenderTags(type) {
+    const wrapId  = { eng:'h_eng_wrap', tech:'h_tech_wrap', office:'h_office_wrap', vacation:'h_vacation_wrap', sick:'h_sick_wrap' }[type];
+    const inputId = { eng:'h_eng_input', tech:'h_tech_input', office:'h_office_input', vacation:'h_vacation_input', sick:'h_sick_input' }[type];
+    const wrap = document.getElementById(wrapId);
+    const inp  = document.getElementById(inputId);
+    wrap.innerHTML = '';
+    h_lists[type].forEach((name, i) => {
+      const tag = document.createElement('div');
+      tag.className = 'tech-tag';
+      tag.innerHTML = esc(name) + ' <button onclick="hRemoveTag(' + i + ','' + type + '')">×</button>';
+      wrap.appendChild(tag);
+    });
+    wrap.appendChild(inp);
+  }
+
+  window.hRemoveTag = function(i, type) { h_lists[type].splice(i,1); hRenderTags(type); };
+
+  window.hAddTask = function() {
+    const wrap = document.getElementById('h_tasks_wrap');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:6px;';
+    row.innerHTML = '<input type="text" placeholder="Task..." style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;">' +
+      '<button onclick="this.parentElement.remove()" style="background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:6px;width:30px;height:30px;cursor:pointer;">×</button>';
+    wrap.appendChild(row);
+    row.querySelector('input').focus();
+  };
+
+  function hGetTasks() {
+    return Array.from(document.querySelectorAll('#h_tasks_wrap input')).map(i=>i.value.trim()).filter(Boolean);
+  }
+
+  window.hAddEntry = function() {
+    const project = document.getElementById('h_project').value.trim();
+    const number  = document.getElementById('h_number').value.trim();
+    if (!project && !number) { toast('Project name or number required','error'); return; }
+    h_pending.push({
+      project, number,
+      car: document.getElementById('h_car').value,
+      carDetail: document.getElementById('h_car_detail').value.trim(),
+      engineers: [...h_lists.eng],
+      technicians: [...h_lists.tech],
+      tasks: hGetTasks()
+    });
+    hClearEntry();
+    hRenderPending();
+    toast('Entry added','success');
+  };
+
+  window.hClearEntry = function() {
+    ['h_project','h_number','h_car_detail'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('h_car').selectedIndex=0;
+    h_lists.eng=[]; h_lists.tech=[];
+    hRenderTags('eng'); hRenderTags('tech');
+    document.getElementById('h_tasks_wrap').innerHTML='';
+  };
+
+  function hRenderPending() {
+    const wrap = document.getElementById('h_pendingList');
+    if (!h_pending.length) { wrap.innerHTML=''; return; }
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;">Staged ('+h_pending.length+') — not published</div>' +
+      h_pending.map((e,i) => '<div style="background:var(--bg);border:1px dashed var(--border2);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
+        '<div><span style="font-weight:600;">🏗 '+esc(e.project)+'</span>' +
+        (e.number?'<span class="project-num" style="margin:0 6px;">'+esc(e.number)+'</span>':'') +
+        '<span style="font-size:12px;color:var(--text2);"> 🚘 '+esc(e.car)+'</span>' +
+        '<span style="font-size:12px;color:var(--text2);"> '+[...e.engineers.map(n=>'م '+n),...e.technicians].join(' · ')+'</span></div>' +
+        '<button class="btn btn-danger-ghost" onclick="hRemovePending('+i+')">Remove</button></div>'
+      ).join('');
+  }
+
+  window.hRemovePending = function(i) { h_pending.splice(i,1); hRenderPending(); };
+
+  window.hPublish = async function() {
+    if (!h_pending.length && !h_lists.office.length && !h_lists.vacation.length && !h_lists.sick.length) {
+      toast('Nothing to publish','error'); return;
+    }
+    try {
+      await setDoc(doc(db,'haraka',h_viewDate), {
+        date: h_viewDate,
+        publishedAt: Date.now(),
+        publishedBy: window._currentUser?.display || 'Admin',
+        entries: h_pending,
+        office: [...h_lists.office],
+        vacation: [...h_lists.vacation],
+        sick: [...h_lists.sick]
+      });
+      h_pending=[]; h_lists.office=[]; h_lists.vacation=[]; h_lists.sick=[];
+      hRenderPending();
+      ['office','vacation','sick'].forEach(t=>hRenderTags(t));
+      toast('Haraka published!','success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  window.hDeleteDay = async function() {
+    if (!confirm('Delete this day?')) return;
+    try { await deleteDoc(doc(db,'haraka',h_viewDate)); toast('Deleted','success'); }
+    catch(e) { toast('Error','error'); }
+  };
+
+  function hRenderFeed(data) {
+    const feed = document.getElementById('h_feed');
+    if (!feed) return;
+    if (!data) {
+      feed.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No haraka for this day</p></div>';
+      return;
+    }
+    const isAdmin = window._currentUser?.role === 'admin';
+    let html = '<div style="text-align:center;padding:10px;font-size:13px;color:var(--text2);margin-bottom:16px;">' +
+      hFmtDateAr(data.date) +
+      (isAdmin ? ' <button class="btn btn-danger-ghost" onclick="hDeleteDay()" style="margin-right:10px;font-size:11px;">🗑 Delete</button>' : '') +
+      '</div>';
+
+    (data.entries||[]).forEach(e => {
+      const icon = e.car==='مواصلات'?'🚌':e.car==='Van'?'🚐':e.car==='Sedan'?'🚗':'🚘';
+      html += '<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--success);border-radius:12px;padding:18px 20px;margin-bottom:12px;">' +
+        '<div style="font-size:15px;font-weight:700;margin-bottom:6px;">🏗️ '+esc(e.project)+
+        (e.number?' <span class="project-num">'+esc(e.number)+'</span>':'')+
+        '</div><div style="font-size:12px;color:var(--text2);margin-bottom:10px;">'+icon+' '+esc(e.car)+(e.carDetail?' — '+esc(e.carDetail):'')+
+        '</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">'+
+        (e.engineers||[]).map(n=>'<span style="background:rgba(0,119,255,0.1);border:1px solid rgba(0,119,255,0.25);color:#60a5fa;border-radius:20px;padding:4px 10px;font-size:12px;">م '+esc(n)+'</span>').join('')+
+        (e.technicians||[]).map(n=>'<span style="background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);color:var(--success);border-radius:20px;padding:4px 10px;font-size:12px;">'+esc(n)+'</span>').join('')+
+        '</div>'+
+        (e.tasks&&e.tasks.length?'<div>'+e.tasks.map(t=>'<div style="font-size:13px;color:var(--text2);padding:2px 0;">▪️ '+esc(t)+'</div>').join('')+'</div>':'')+
+        '</div>';
+    });
+
+    const badge = (emoji,arr,col) => arr&&arr.length?'<div style="background:var(--card);border:1px solid '+col+';border-radius:12px;padding:14px 18px;margin-bottom:12px;"><div style="font-weight:600;margin-bottom:8px;">'+emoji+'</div><div style="display:flex;flex-wrap:wrap;gap:6px;">'+arr.map(n=>'<span style="background:rgba(0,0,0,0.2);border:1px solid '+col+';border-radius:20px;padding:3px 10px;font-size:12px;">'+esc(n)+'</span>').join('')+'</div></div>':'';
+    html += badge('🏢 Office', data.office, 'rgba(0,119,255,0.3)');
+    html += badge('😴 Annual Leave', data.vacation, 'rgba(255,170,0,0.3)');
+    html += badge('🤒 Sick Leave', data.sick, 'rgba(255,68,85,0.3)');
+
+    if (data.publishedBy) {
+      html += '<div style="text-align:center;font-size:11px;color:var(--text3);font-family:var(--mono);padding:14px;">Published by '+esc(data.publishedBy)+' at '+new Date(data.publishedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'</div>';
+    }
+    feed.innerHTML = html;
+  }
+
+  // Firebase starts on login
+  window.addEventListener('avUserLogin', () => { initFirebase(); });
 
   // ── AUTO CLEANUP at midnight ──
   async function cleanupPastDays() {
@@ -1833,5 +2305,6 @@
     navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
   }
 </script>
+</div><!-- /appShell -->
 </body>
 </html>
