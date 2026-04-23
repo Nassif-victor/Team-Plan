@@ -1391,8 +1391,8 @@ function doLogin() {
   document.getElementById('headerRole').textContent = found.role;
   // Show tabs by role
   applyRoleUI(found.role);
-  // Fire event for module
-  window.dispatchEvent(new CustomEvent('avUserLogin', { detail: window._currentUser }));
+  // Signal module to init Firebase
+  window._pendingLogin = true;
 }
 
 function doLogout() {
@@ -2234,8 +2234,15 @@ document.addEventListener('DOMContentLoaded', function() {
     feed.innerHTML = html;
   }
 
-  // Firebase starts on login
-  window.addEventListener('avUserLogin', () => { initFirebase(); });
+  // Wait for login signal then init Firebase
+  (function waitForLogin() {
+    if (window._pendingLogin) {
+      window._pendingLogin = false;
+      initFirebase();
+    } else {
+      setTimeout(waitForLogin, 100);
+    }
+  })();
 
   // ── AUTO CLEANUP at midnight ──
   async function cleanupPastDays() {
