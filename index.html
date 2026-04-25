@@ -1214,6 +1214,8 @@
         </tbody>
       </table>
     </div>
+      <div class="scroll-hint">← Scroll to see more →</div>
+    </div>
 
   </div>
 
@@ -1327,7 +1329,7 @@
       <button onclick="hGoToday()" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">Today</button>
     </div>
 
-    <button class="btn-publish-h" onclick="hPublish()">✅ Publish الحركة</button>
+    <button class="btn-publish-h" onclick="hPublish()">💾 Save الحركة</button>
 
     <!-- FEED -->
     <div id="h_feed" style="margin-top:24px;"></div>
@@ -1456,12 +1458,12 @@
   // 🔴 ضع الـ Firebase Config بتاعك هنا
   // ══════════════════════════════════════════
   const firebaseConfig = {
-    apiKey: "AIzaSyCYEtHREe9zHk0ZEXtNIj9eNMDx5gawJvI",
-    authDomain: "daily-project-management.firebaseapp.com",
-    projectId: "daily-project-management",
-    storageBucket: "daily-project-management.firebasestorage.app",
-    messagingSenderId: "1031583044973",
-    appId: "1:1031583044973:web:37a375905a8b975297b664"
+    apiKey: "AIzaSyC6ZG0-eq-bQR-240YaG8Og6T3iJUnhT_M",
+    authDomain: "team-plan-21013.firebaseapp.com",
+    projectId: "team-plan-21013",
+    storageBucket: "team-plan-21013.firebasestorage.app",
+    messagingSenderId: "349412644778",
+    appId: "1:349412644778:web:77de28edbc64a1db90fdd3"
   };
   // ══════════════════════════════════════════
 
@@ -2246,6 +2248,7 @@
       if (e.coord)  html += '<div class="haraka-row"><span class="emoji">📞</span>التنسيق مع ' + esc(e.coord) + '</div>';
       if (e.depart) html += '<div class="haraka-row"><span class="emoji">🕐</span>التحرك الساعة ' + esc(e.depart) + '</div>';
       html += '</div>';
+      html += '<hr style="border:none;border-top:1px solid var(--border);margin:0;">';
     });
 
     // Office
@@ -2273,9 +2276,43 @@
       html += '</div></div>';
     }
 
+    // Always show office/vacation/sick even if empty
+    html += '<div class="haraka-entry" style="border-left-color:var(--accent2);margin-top:8px;">';
+    html += '<div class="haraka-project-name">🏢 Office</div>';
+    if (data.office && data.office.length) {
+      html += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+      data.office.forEach(n => { html += '<span class="haraka-person engineer">👨🏻‍💻 م ' + esc(n) + '</span>'; });
+      html += '</div>';
+    } else {
+      html += '<div style="font-size:12px;color:var(--text3);">—</div>';
+    }
+    html += '</div>';
+
+    html += '<div class="haraka-entry" style="border-left-color:var(--warn);">';
+    html += '<div class="haraka-project-name">😴 Annual Leave</div>';
+    if (data.vacation && data.vacation.length) {
+      html += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+      data.vacation.forEach(n => { html += '<span class="haraka-person" style="background:rgba(255,170,0,0.1);border-color:rgba(255,170,0,0.3);color:var(--warn);">👷🏻‍♂️ ' + esc(n) + '</span>'; });
+      html += '</div>';
+    } else {
+      html += '<div style="font-size:12px;color:var(--text3);">—</div>';
+    }
+    html += '</div>';
+
+    html += '<div class="haraka-entry" style="border-left-color:var(--danger);">';
+    html += '<div class="haraka-project-name">🤒 Sick Leave</div>';
+    if (data.sick && data.sick.length) {
+      html += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+      data.sick.forEach(n => { html += '<span class="haraka-person" style="background:rgba(255,68,85,0.08);border-color:rgba(255,68,85,0.25);color:var(--danger);">👷🏻‍♂️ ' + esc(n) + '</span>'; });
+      html += '</div>';
+    } else {
+      html += '<div style="font-size:12px;color:var(--text3);">—</div>';
+    }
+    html += '</div>';
+
     html += '</div>';
     if (data.publishedAt) {
-      html += '<div style="text-align:center;font-size:11px;color:var(--text3);font-family:var(--mono);padding:14px;">Published at ' + new Date(data.publishedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</div>';
+      html += '<div style="text-align:center;font-size:11px;color:var(--text3);font-family:var(--mono);padding:14px;">Saved at ' + new Date(data.publishedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</div>';
     }
     feed.innerHTML = html;
   }
