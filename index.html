@@ -2042,6 +2042,7 @@
         else html+='<button class="confirm-btn" onclick="hConfirmDriver(\'' + dateStr + '\','+ei+')">🚗 تم التنسيق مع السواق</button>';
       }
       html += '<div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-start;">';
+      html += '<button onclick="hEditEntry(\''+dateStr+'\','+ei+')" style="background:transparent;border:1px solid rgba(0,194,255,0.3);color:var(--accent);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">✏️ تعديل</button>';
       html += '<button onclick="hDeleteEntry(this.getAttribute(\'data-d\'),parseInt(this.getAttribute(\'data-i\')))" data-d="'+dateStr+'" data-i="'+ei+'" style="background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🗑 حذف</button>';
       html += '</div>';
       html += '</div><hr style="border:none;border-top:1px solid var(--border);margin:0;">';
@@ -2063,8 +2064,46 @@
     feed.innerHTML = html;
   }
 
-  window.hDeleteEntry = async function(dateStr, entryIdx) {
-    if (!confirm('حذف هذا المشروع من الحركة؟')) return;
+  window.hEditEntry = async function(dateStr, entryIdx) {
+    try {
+      const docRef = doc(db, 'haraka', dateStr);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) return;
+      const e = snap.data().entries[entryIdx];
+      if (!e) return;
+      // Pre-fill the form
+      document.getElementById('h_project').value = e.project || '';
+      document.getElementById('h_number').value  = e.number  || '';
+      document.getElementById('h_car_detail').value = e.carDetail || '';
+      document.getElementById('h_coord').value   = e.coord  || '';
+      document.getElementById('h_depart').value  = e.depart || '';
+      // Set car
+      const carSel = document.getElementById('h_car');
+      for (let i=0; i<carSel.options.length; i++) {
+        if (carSel.options[i].value === e.car) { carSel.selectedIndex = i; break; }
+      }
+      // Set engineers & techs
+      h_lists.eng  = [...(e.engineers||[])];
+      h_lists.tech = [...(e.technicians||[])];
+      hRenderTags('eng'); hRenderTags('tech');
+      // Set tasks
+      document.getElementById('h_tasks_wrap').innerHTML = '';
+      (e.tasks||[]).forEach(t => {
+        hAddTaskRow();
+        const inputs = document.querySelectorAll('#h_tasks_wrap input');
+        inputs[inputs.length-1].value = t;
+      });
+      // Delete the old entry first
+      await window.hDeleteEntry(dateStr, entryIdx, true);
+      toast('✏️ تم تحميل البيانات — عدّل وأضف للقائمة', 'success');
+      // Scroll to top of haraka panel
+      document.getElementById('panel-haraka').scrollTop = 0;
+      window.scrollTo(0,0);
+    } catch(err) { toast('Error: '+err.message,'error'); }
+  };
+
+  window.hDeleteEntry = async function(dateStr, entryIdx, silent) {
+    if (!silent && !confirm('حذف هذا المشروع من الحركة؟')) return;
     try {
       const docRef = doc(db, 'haraka', dateStr);
       const snap = await getDoc(docRef);
