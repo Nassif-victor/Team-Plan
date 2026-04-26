@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AV \ Nassif — Project Manager</title>
+<!-- PWA -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AV Nassif">
+<meta name="theme-color" content="#0a0c10">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #111318;
+    --bg3: #181c24;
+    --border: #1e2430;
+    --border2: #2a3040;
+    --accent: #00c2ff;
+    --accent2: #0077ff;
+    --success: #00e5a0;
+    --warn: #ffaa00;
+    --danger: #ff4455;
+    --text: #e8eaf0;
+    --text2: #8892a4;
+    --text3: #4a5568;
+    --card: #13161e;
+    --font: 'IBM Plex Sans', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  body.light-mode {
+    --bg: #f0f2f5;
+    --bg2: #ffffff;
+    --bg3: #e8eaed;
+    --border: #d1d5db;
+    --border2: #9ca3af;
+    --accent: #0077ff;
+    --accent2: #005bcc;
+    --success: #059669;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --text: #111827;
+    --text2: #374151;
+    --text3: #9ca3af;
+    --card: #ffffff;
+  }
+
+  body.light-mode body::before { opacity: 0.3; }
+
+  /* ─── THEME TOGGLE ─── */
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    cursor: pointer;
+  }
+
+  .toggle-switch input { display: none; }
+
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--border2);
+    border-radius: 11px;
+    transition: background 0.3s;
+  }
+
+  .toggle-switch input:checked + .toggle-track { background: var(--accent2); }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    pointer-events: none;
+  }
+
+  .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── GRID BG ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,194,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,194,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: relative;
+    z-index: 10;
+    background: rgba(10,12,16,0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-badge {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: #000;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .logo-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .live-dot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  .live-dot::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ─── TABS ─── */
+  .tabs-bar {
+    position: relative;
+    z-index: 10;
+    background: rgba(10,12,16,0.9);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    gap: 0;
+    backdrop-filter: blur(8px);
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 14px 24px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    top: 1px;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--text2); }
+
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-icon { font-size: 15px; }
+
+  /* ─── MAIN CONTENT ─── */
+  main {
+    position: relative;
+    z-index: 5;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SECTION HEADER ─── */
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(var(--accent2), var(--accent));
+    border-radius: 2px;
+  }
+
+  /* ─── FORM CARD ─── */
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 32px;
+  }
+
+  .form-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    font-family: var(--mono);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .field input, .field select {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    direction: rtl;
+  }
+
+  .field input:focus, .field select:focus {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(0,119,255,0.15);
+  }
+
+  .field input::placeholder { color: var(--text3); }
+
+  .field select option {
+    background: var(--bg3);
+    color: var(--text);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: #000;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,194,255,0.3);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+
+  .btn-ghost:hover { border-color: var(--text3); color: var(--text); }
+
+  .btn-danger-ghost {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid rgba(255,68,85,0.3);
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .btn-danger-ghost:hover { background: rgba(255,68,85,0.1); }
+
+  .btn-edit-ghost {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid rgba(0,194,255,0.3);
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .btn-edit-ghost:hover { background: rgba(0,194,255,0.1); }
+
+  /* ─── TABLE ─── */
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #2a3040 transparent;
+  }
+
+  .table-scroll::-webkit-scrollbar { height: 4px; }
+  .table-scroll::-webkit-scrollbar-track { background: transparent; }
+  .table-scroll::-webkit-scrollbar-thumb { background: #2a3040; border-radius: 2px; }
+  .table-scroll table { min-width: 680px; }
+
+  .scroll-hint {
+    display: none;
+    font-size: 11px;
+    color: #4a5568;
+    text-align: center;
+    padding: 6px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    border-top: 1px solid #1e2430;
+  }
+
+  .date-cell { color: var(--warn); font-family: var(--mono); font-size: 12px; }
+  .today-cell { color: var(--accent); font-family: var(--mono); font-size: 12px; font-weight: 700; }
+
+  /* ─── PRINT ─── */
+  @media print {
+    body { background: #fff !important; color: #000 !important; }
+    body::before { display: none; }
+    header, .tabs-bar, .stats-row, #filterBar, .scroll-hint,
+    #installBanner, #toast, .modal-overlay, #exportBtn,
+    #panel-projects, #sortBar { display: none !important; }
+    .tab-panel { display: block !important; }
+    #panel-add { display: none !important; }
+    #panel-view { display: block !important; }
+    .table-wrap { border: 1px solid #ccc !important; border-radius: 0 !important; }
+    .table-scroll { overflow: visible !important; }
+    .table-scroll table { min-width: unset !important; width: 100% !important; }
+    thead th {
+      background: #1a1a2e !important;
+      color: #fff !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    tbody tr { border-bottom: 1px solid #ddd !important; }
+    tbody td { color: #000 !important; }
+    .project-num { color: #0077ff !important; }
+    .location-tag { background: #fff3cd !important; color: #856404 !important; border: 1px solid #ffc107 !important; }
+    .engineer-chip { background: #f8f9fa !important; border: 1px solid #dee2e6 !important; color: #000 !important; }
+    .engineer-avatar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .tech-count { color: #198754 !important; }
+    .today-cell { color: #0077ff !important; font-weight: 700 !important; }
+    .date-cell { color: #cc6600 !important; }
+    .print-header { display: block !important; }
+    main { padding: 0 !important; max-width: 100% !important; }
+  }
+
+  .print-header {
+    display: none;
+    text-align: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #000;
+  }
+  .print-header h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .print-header p { font-size: 13px; color: #555; }
+
+  @media (max-width: 768px) { .scroll-hint { display: block; } }
+
+  .table-header-bar {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .table-header-bar .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .count-badge {
+    background: rgba(0,194,255,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(0,194,255,0.2);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-family: var(--mono);
+    font-weight: 600;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background: var(--bg3);
+    padding: 12px 16px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  tbody td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .project-num {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .project-name { font-weight: 500; }
+
+  .location-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,170,0,0.1);
+    color: var(--warn);
+    border: 1px solid rgba(255,170,0,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+  }
+
+  .engineer-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+  }
+
+  .engineer-avatar {
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: #000;
+  }
+
+  .tech-count {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--success);
+  }
+
+  .actions-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--text3);
+  }
+
+  .empty-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+
+  .empty-state p { font-size: 14px; }
+
+  /* ─── LOADING ─── */
+  .loading-row td {
+    text-align: center;
+    padding: 40px;
+    color: var(--text3);
+    font-size: 13px;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── TOAST ─── */
+  #toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    pointer-events: none;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  #toast.success { border-color: rgba(0,229,160,0.3); color: var(--success); }
+  #toast.error { border-color: rgba(255,68,85,0.3); color: var(--danger); }
+
+  /* ─── MODAL ─── */
+  body.modal-open {
+    overflow: hidden;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ─── FIREBASE CONFIG NOTE ─── */
+  .config-banner {
+    background: rgba(255,170,0,0.08);
+    border: 1px solid rgba(255,170,0,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .config-banner-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+  .config-banner-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  .config-banner-text strong { color: var(--warn); }
+
+  .config-banner-text code {
+    font-family: var(--mono);
+    background: rgba(255,255,255,0.05);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  /* ─── VIEW TAB STATS ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: var(--mono);
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: var(--mono);
+    color: var(--accent);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    header { padding: 0 16px; }
+    main { padding: 20px 12px; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    thead th:nth-child(4),
+    tbody td:nth-child(4) { display: none; }
+    .tabs-bar { padding: 0 16px; }
+    .tab-btn { padding: 12px 14px; font-size: 12px; }
+  }
+
+  @media (max-width: 480px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── HARAKA ── */
+  #panel-haraka { direction: rtl; }
+  #panel-haraka input, #panel-haraka select, #panel-haraka .h-bare-input {
+    text-align: right; direction: rtl;
+  }
+  .haraka-feed { display:flex; flex-direction:column; gap:0; margin-top:20px; }
+  .haraka-entry { direction:rtl; text-align:right; border-left:none !important; border-right:3px solid var(--success); }
+  .haraka-entry.needs-confirm { border-right-color:var(--danger) !important; border-left:none !important; }
+  .haraka-project-name { flex-direction:row-reverse; }
+  .haraka-row { flex-direction:row-reverse; }
+  .haraka-tasks { direction:rtl; }
+  .haraka-date-banner { direction:rtl; text-align:center; }
+  .haraka-entry {
+    background:var(--card); border:1px solid var(--border);
+    border-right:3px solid var(--success);
+    padding:18px 20px;
+  }
+  .haraka-entry.needs-confirm { border-left-color:var(--danger)!important; box-shadow:0 0 0 2px rgba(255,68,85,0.3); }
+  .haraka-project-name { font-size:16px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .haraka-project-num { font-family:var(--mono); font-size:12px; color:var(--accent); background:rgba(0,194,255,0.1); border:1px solid rgba(0,194,255,0.2); border-radius:4px; padding:1px 8px; }
+  .haraka-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2); padding:3px 0; flex-wrap:wrap; }
+  .haraka-person { display:inline-flex; align-items:center; gap:5px; background:rgba(0,229,160,0.08); border:1px solid rgba(0,229,160,0.2); color:var(--success); border-radius:20px; padding:3px 10px; font-size:12px; margin:2px; }
+  .haraka-person.engineer { background:rgba(0,119,255,0.1); border-color:rgba(0,119,255,0.25); color:#60a5fa; }
+  .haraka-tasks { margin-top:8px; display:flex; flex-direction:column; gap:4px; }
+  .haraka-task { font-size:13px; color:var(--text2); display:flex; align-items:flex-start; gap:6px; }
+  .haraka-date-banner { text-align:center; font-size:13px; font-weight:600; color:var(--accent); font-family:var(--mono); margin-bottom:8px; padding:10px; background:rgba(0,194,255,0.06); border:1px solid rgba(0,194,255,0.15); border-radius:8px; }
+  .h-builder { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .h-section-label { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-family:var(--mono); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .h-section-label::before { content:''; width:3px; height:13px; background:linear-gradient(var(--accent2),var(--accent)); border-radius:2px; display:inline-block; }
+  .h-tags-box { display:flex; flex-wrap:wrap; gap:6px; align-items:center; background:var(--bg3); border:1px solid var(--border2); border-radius:8px; padding:7px 10px; min-height:38px; cursor:text; }
+  .h-tag { display:inline-flex; align-items:center; gap:5px; background:var(--bg); border:1px solid var(--border2); border-radius:20px; padding:3px 10px; font-size:12px; }
+  .h-tag button { background:none; border:none; color:var(--text3); cursor:pointer; font-size:12px; line-height:1; padding:0; }
+  .h-tag button:hover { color:var(--danger); }
+  .h-bare-input { background:none; border:none; outline:none; font-size:13px; color:var(--text); min-width:120px; flex:1; font-family:var(--font); }
+  .h-task-row { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
+  .h-task-row input { flex:1; background:var(--bg3); border:1px solid var(--border2); border-radius:7px; padding:8px 12px; color:var(--text); font-family:var(--font); font-size:13px; outline:none; }
+  .h-task-row input:focus { border-color:var(--accent2); }
+  .btn-add-task-h { background:transparent; border:1px dashed var(--border2); color:var(--text3); border-radius:7px; padding:7px 12px; font-size:12px; cursor:pointer; width:100%; font-family:var(--font); transition:all 0.2s; margin-top:4px; }
+  .btn-add-task-h:hover { border-color:var(--accent); color:var(--accent); }
+  .h-pending-item { background:var(--bg); border:1px dashed var(--border2); border-radius:8px; padding:10px 14px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .btn-save-h { width:100%; background:linear-gradient(135deg,#00c27a,#00e5a0); color:#000; border:none; border-radius:10px; padding:13px; font-family:var(--font); font-size:14px; font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn-save-h:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,229,160,0.3); }
+  .confirm-btn { display:inline-flex; align-items:center; gap:6px; background:transparent; border:1px solid rgba(0,229,160,0.4); color:var(--success); border-radius:8px; padding:5px 12px; font-size:12px; cursor:pointer; font-family:var(--font); transition:all 0.2s; margin-top:8px; }
+  .confirm-btn:hover { background:rgba(0,229,160,0.1); }
+  .confirm-name { font-size:11px; color:var(--success); font-family:var(--mono); margin-top:6px; }
+
+  .haraka-entry.needs-confirm {
+    border-left-color: var(--danger) !important;
+    box-shadow: 0 0 0 2px rgba(255,68,85,0.25);
+  }
+  .confirm-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    background:transparent; border:1px solid rgba(0,229,160,0.4);
+    color:var(--success); border-radius:8px; padding:6px 14px;
+    font-size:12px; cursor:pointer; font-family:var(--font);
+    transition:all 0.2s; margin-top:10px;
+  }
+  .confirm-btn:hover { background:rgba(0,229,160,0.1); }
+  .confirm-name {
+    font-size:12px; color:var(--success);
+    font-family:var(--mono); margin-top:8px;
+    padding:6px 10px; background:rgba(0,229,160,0.08);
+    border-radius:6px; border:1px solid rgba(0,229,160,0.2);
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-badge">AV\NASSIF</span>
+    <span class="logo-text">Project Manager</span>
+  </div>
+  <div class="header-right">
+    <div class="theme-toggle">
+      <span>🌙</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+      <span>☀️</span>
+    </div>
+    <div class="live-dot" id="liveStatus">Connecting...</div>
+  </div>
+</header>
+
+<!-- TABS BAR -->
+<div class="tabs-bar">
+  <button class="tab-btn" onclick="switchTab('projects')" id="tab-projects">
+    <span class="tab-icon">🗂</span> Projects
+  </button>
+  <button class="tab-btn active" onclick="switchTab('add')" id="tab-add">
+    <span class="tab-icon">＋</span> Add / Edit
+  </button>
+  <button class="tab-btn" onclick="switchTab('view')" id="tab-view">
+    <span class="tab-icon">◎</span> View Projects
+  </button>
+  <button class="tab-btn" onclick="switchTab('haraka')" id="tab-haraka">
+    <span class="tab-icon">🚀</span> الحركة
+  </button>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ─── TAB 0: PROJECTS ─── -->
+  <div class="tab-panel" id="panel-projects">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div class="section-title" style="margin-bottom:0;">Projects Registry</div>
+      <button class="btn btn-primary" onclick="openAddProjectModal()">＋ Add Project</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header-bar">
+        <span class="label">Registered Projects</span>
+        <span class="count-badge" id="countBadgeProjects">0</span>
+      </div>
+      <div class="table-scroll"><table style="min-width:700px;table-layout:fixed;width:100%;">
+        <colgroup>
+          <col style="width:50px">
+          <col style="width:160px">
+          <col style="width:220px">
+          <col style="width:160px">
+          <col style="width:140px">
+          <col style="width:140px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th style="text-align:center">#</th>
+            <th>Project No.</th>
+            <th>Project Name</th>
+            <th>Site Engineer</th>
+            <th>Location</th>
+            <th style="text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="projectsTableBody">
+          <tr class="loading-row"><td colspan="6"><div class="spinner"></div> Loading...</td></tr>
+        </tbody>
+      </table></div>
+      <div class="scroll-hint">← Scroll to see more →</div>
+    </div>
+  </div>
+
+  <!-- ─── TAB 1: ADD / EDIT ─── -->
+  <div class="tab-panel active" id="panel-add">
+
+    <div class="config-banner" id="configBanner">
+      <div class="config-banner-icon">⚙️</div>
+      <div class="config-banner-text">
+        <strong>One step before using:</strong> اعمل مشروع على
+        <a href="https://console.firebase.google.com" target="_blank" style="color:var(--accent)">Firebase Console</a>
+        enable <strong>Firestore Database</strong>, then paste your config in the
+        <code>firebaseConfig</code> at the bottom of the script. Set Rules to
+        <code>allow read, write: if true;</code> for internal use.
+      </div>
+    </div>
+
+    <div class="section-title">Add New Project</div>
+
+    <div class="form-card">
+      <div class="form-card-title" id="formModeLabel">▸ Project Details</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Project Name</label>
+          <input type="text" id="f_name" placeholder="Project Name">
+        </div>
+        <div class="field">
+          <label>Project Number</label>
+          <input type="text" id="f_number" placeholder="e.g. PRJ-2025-001" oninput="autoFillProject()">
+        </div>
+        <div class="field">
+          <label>Project Location</label>
+          <input type="text" id="f_location" placeholder="Location">
+        </div>
+        <div class="field">
+          <label>Site Engineer</label>
+          <input type="text" id="f_engineer" placeholder="Engineer Name">
+        </div>
+        <div class="field">
+          <label>Assigned Team Leader</label>
+          <input type="text" id="f_leader" placeholder="Team Leader Name">
+        </div>
+        <div class="field">
+          <label>No. of Required Technicians</label>
+          <input type="number" id="f_techs" placeholder="0" min="0">
+        </div>
+        <div class="field">
+          <label>Task</label>
+          <input type="text" id="f_task" placeholder="Task description">
+        </div>
+        <div class="field">
+          <label>Date From</label>
+          <input type="date" id="f_date_from">
+        </div>
+        <div class="field">
+          <label>Date To</label>
+          <input type="date" id="f_date_to">
+        </div>
+        <div class="field">
+          <label>Car Type</label>
+          <select id="f_car_type">
+            <option value="">— Select —</option>
+            <option value="Sedan">Sedan</option>
+            <option value="Van">Van</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Car Classification</label>
+          <select id="f_car_class" onchange="onCarClassChange('f_')">
+            <option value="">— Select —</option>
+            <option value="شركة">شركة</option>
+            <option value="إيجار">إيجار</option>
+            <option value="شركة/إيجار">شركة/إيجار</option>
+            <option value="مواصلات">مواصلات</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <label>Notes</label>
+          <input type="text" id="f_notes" placeholder="Notes...">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+        <button class="btn btn-primary" onclick="saveProject()">
+          <span id="saveBtnIcon">＋</span>
+          <span id="saveBtnText">Add Project</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header-bar">
+        <span class="label">Added Projects</span>
+        <span class="count-badge" id="countBadge1">0</span>
+      </div>
+      <div class="table-scroll"><table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Project No.</th>
+            <th>Project Name</th>
+            <th>Location</th>
+            <th>Site Engineer</th>
+            <th>Team Leader</th>
+            <th>Techs</th>
+            <th>Task</th>
+            <th>Car Type</th>
+            <th>Car Class</th>
+            <th>Notes</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="editTableBody">
+          <tr class="loading-row">
+            <td colspan="8">
+              <div class="spinner"></div> جاري التحميل...
+            </td>
+          </tr>
+        </tbody>
+      </table></div>
+      <div class="scroll-hint">← Scroll to see more →</div>
+    </div>
+
+  </div>
+
+  <!-- ─── TAB 2: VIEW ONLY ─── -->
+  <div class="tab-panel" id="panel-view">
+
+    <!-- DATE FILTER -->
+    <div style="
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:16px 20px;
+      margin-bottom:20px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      flex-wrap:wrap;
+    ">
+      <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);flex-shrink:0;">📅 Filter by Date</div>
+      <input type="date" id="filterDate" style="
+        background:var(--bg3);
+        border:1px solid var(--border2);
+        border-radius:8px;
+        padding:8px 14px;
+        color:var(--text);
+        font-family:var(--font);
+        font-size:14px;
+        outline:none;
+        cursor:pointer;
+      " oninput="applyDateFilter()">
+      <button onclick="clearDateFilter()" style="
+        background:transparent;
+        border:1px solid var(--border2);
+        color:var(--text2);
+        border-radius:8px;
+        padding:8px 14px;
+        font-family:var(--font);
+        font-size:13px;
+        cursor:pointer;
+      ">Show All</button>
+      <div id="filterLabel" style="font-size:13px;color:var(--accent);font-family:var(--mono);margin-right:auto;"></div>
+    </div>
+
+    <div id="sortBar" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <span style="font-size:12px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;">Sort:</span>
+      <button id="sortDayBtn" onclick="setSortMode('day')" class="btn btn-ghost" style="padding:7px 14px;font-size:12px;">📅 Sort by Day</button>
+      <button id="sortCreatedBtn" onclick="setSortMode('created')" class="btn btn-ghost" style="padding:7px 14px;font-size:12px;">🕐 Sort by Created</button>
+    </div>
+
+    <div class="print-header" id="printHeader">
+      <h2>AV \ Nassif — Project Manager</h2>
+      <p id="printSubtitle">Projects Report</p>
+    </div>
+
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <div class="stat-label">Total Projects</div>
+        <div class="stat-value" id="stat-total">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Technicians</div>
+        <div class="stat-value" id="stat-techs">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Engineers</div>
+        <div class="stat-value" id="stat-engineers">—</div>
+      </div>
+      <div class="stat-card" id="support-card">
+        <div class="stat-label">Need Support</div>
+        <div class="stat-value" id="stat-support">—</div>
+        <div id="support-sub" style="font-size:11px;margin-top:6px;font-family:var(--mono);color:var(--text3)"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div class="section-title" style="margin-bottom:0;">All Projects</div>
+      <button id="exportBtn" onclick="exportPDF()" class="btn btn-primary" style="gap:8px;">
+        🖨 تصدير PDF
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header-bar">
+        <span class="label">Live Projects</span>
+        <span class="count-badge" id="countBadge2">0</span>
+      </div>
+      <div class="table-scroll"><table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Project No.</th>
+            <th>Project Name</th>
+            <th>Location</th>
+            <th>Site Engineer</th>
+            <th>Team Leader</th>
+            <th>Techs</th>
+            <th>Task</th>
+            <th>Car Type</th>
+            <th>Car Class</th>
+            <th>Notes</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="viewTableBody">
+          <tr class="loading-row">
+            <td colspan="7">
+              <div class="spinner"></div> جاري التحميل...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ─── HARAKA TAB ─── -->
+  <div class="tab-panel" id="panel-haraka" style="direction:rtl;">
+    <div class="h-builder">
+      <div class="h-section-label">Add Entry</div>
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="field"><label>🏗️ Project Name</label>
+          <input type="text" id="h_project" placeholder="اسم المشروع" oninput="hAutoFill()"></div>
+        <div class="field"><label>Project Number</label>
+          <input type="text" id="h_number" placeholder="A2XXX" oninput="hAutoFillByNumber()"></div>
+        <div class="field"><label>🚘 Transportation</label>
+          <select id="h_car">
+            <option value="مواصلات">🚌 مواصلات</option>
+            <option value="Sedan">🚗 Sedan</option>
+            <option value="Van">🚐 Van</option>
+            <option value="ايجار">🚕 إيجار</option>
+            <option value="شركة/إيجار">🏢 شركة/إيجار</option>
+          </select></div>
+        <div class="field"><label>Car Detail</label>
+          <input type="text" id="h_car_detail" placeholder="اسم السواق / اللوحة"></div>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>👨🏻‍💻 Engineers (م)</label>
+        <div class="h-tags-box" id="h_eng_wrap" onclick="document.getElementById('h_eng_input').focus()">
+          <input class="h-bare-input" id="h_eng_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'eng')">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>👷🏻‍♂️ Technicians</label>
+        <div class="h-tags-box" id="h_tech_wrap" onclick="document.getElementById('h_tech_input').focus()">
+          <input class="h-bare-input" id="h_tech_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'tech')">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>▪️ Tasks</label>
+        <div id="h_tasks_wrap"></div>
+        <button class="btn-add-task-h" onclick="hAddTaskRow()">+ Add task</button>
+      </div>
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="field"><label>📞 التنسيق مع</label>
+          <input type="text" id="h_coord" placeholder="م عبدالرحمن"></div>
+        <div class="field"><label>🕐 وقت التحرك</label>
+          <input type="text" id="h_depart" placeholder="8:30"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="hClearEntry()">Clear</button>
+        <button class="btn btn-primary" onclick="hAddEntry()">+ Add to List</button>
+      </div>
+    </div>
+
+    <div id="h_pending_wrap"></div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;">
+      <div class="form-card" style="padding:14px;">
+        <div class="form-card-title" style="margin-bottom:8px;">🏢 Office</div>
+        <div class="h-tags-box" id="h_office_wrap" onclick="document.getElementById('h_office_input').focus()">
+          <input class="h-bare-input" id="h_office_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'office')">
+        </div>
+      </div>
+      <div class="form-card" style="padding:14px;">
+        <div class="form-card-title" style="margin-bottom:8px;">😴 Annual Leave</div>
+        <div class="h-tags-box" id="h_vacation_wrap" onclick="document.getElementById('h_vacation_input').focus()">
+          <input class="h-bare-input" id="h_vacation_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'vacation')">
+        </div>
+      </div>
+      <div class="form-card" style="padding:14px;">
+        <div class="form-card-title" style="margin-bottom:8px;">🤒 Sick Leave</div>
+        <div class="h-tags-box" id="h_sick_wrap" onclick="document.getElementById('h_sick_input').focus()">
+          <input class="h-bare-input" id="h_sick_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'sick')">
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+      <span style="font-size:12px;color:var(--text2);font-family:var(--mono);">📅 التاريخ:</span>
+      <input type="date" id="h_date" onchange="hLoadDay(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;">
+      <button onclick="hGoToday()" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">اليوم</button>
+    </div>
+
+    <button class="btn-save-h" onclick="hPublish()">💾 Save الحركة</button>
+
+    <div id="h_feed" style="margin-top:24px;"></div>
+  </div>
+
+
+</main>
+
+<!-- PROJECT REGISTRY MODAL -->
+<div class="modal-overlay" id="projectModal">
+  <div class="modal">
+    <div class="modal-title" id="projectModalTitle">🗂 Add Project</div>
+    <input type="hidden" id="pm_id">
+    <div class="form-grid">
+      <div class="field">
+        <label>Project Number</label>
+        <input type="text" id="pm_number" placeholder="e.g. PRJ-001">
+      </div>
+      <div class="field">
+        <label>Project Name</label>
+        <input type="text" id="pm_name" placeholder="Project Name">
+      </div>
+      <div class="field">
+        <label>Site Engineer</label>
+        <input type="text" id="pm_engineer" placeholder="Engineer Name">
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" id="pm_location" placeholder="Site Location">
+      </div>
+    </div>
+    <div class="form-actions" style="margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeProjectModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProjectRegistry()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Project</div>
+    <input type="hidden" id="edit_id">
+    <div class="form-grid">
+      <div class="field">
+        <label>Project Name</label>
+        <input type="text" id="edit_name" placeholder="Project Name">
+      </div>
+      <div class="field">
+        <label>Project Number</label>
+        <input type="text" id="edit_number" placeholder="Project Number">
+      </div>
+      <div class="field">
+        <label>Project Location</label>
+        <input type="text" id="edit_location" placeholder="Location">
+      </div>
+      <div class="field">
+        <label>Site Engineer</label>
+        <input type="text" id="edit_engineer" placeholder="Site Engineer">
+      </div>
+      <div class="field">
+        <label>Assigned Team Leader</label>
+        <input type="text" id="edit_leader" placeholder="Team Leader">
+      </div>
+      <div class="field">
+        <label>No. of Technicians</label>
+        <input type="number" id="edit_techs" placeholder="0" min="0">
+      </div>
+      <div class="field">
+        <label>Task</label>
+        <input type="text" id="edit_task" placeholder="Task description">
+      </div>
+      <div class="field">
+        <label>Date From</label>
+        <input type="date" id="edit_date_from">
+      </div>
+      <div class="field">
+        <label>Date To</label>
+        <input type="date" id="edit_date_to">
+      </div>
+      <div class="field">
+        <label>Car Type</label>
+        <select id="edit_car_type">
+          <option value="">— Select —</option>
+          <option value="Sedan">Sedan</option>
+          <option value="Van">Van</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Car Classification</label>
+        <select id="edit_car_class" onchange="onCarClassChange('edit_')">
+          <option value="">— Select —</option>
+          <option value="شركة">شركة</option>
+          <option value="إيجار">إيجار</option>
+          <option value="شركة/إيجار">شركة/إيجار</option>
+          <option value="مواصلات">مواصلات</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>Notes</label>
+        <input type="text" id="edit_notes" placeholder="Notes...">
+      </div>
+    </div>
+    <div class="form-actions" style="margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="updateProject()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ─────────────────────────────────────────
+     FIREBASE + APP LOGIC
+     ───────────────────────────────────────── -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, getDocs,
+    deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, setDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ══════════════════════════════════════════
+  // 🔴 ضع الـ Firebase Config بتاعك هنا
+  // ══════════════════════════════════════════
+  const firebaseConfig = {
+    apiKey: "AIzaSyC6ZG0-eq-bQR-240YaG8Og6T3iJUnhT_M",
+    authDomain: "team-plan-21013.firebaseapp.com",
+    projectId: "team-plan-21013",
+    storageBucket: "team-plan-21013.firebasestorage.app",
+    messagingSenderId: "349412644778",
+    appId: "1:349412644778:web:77de28edbc64a1db90fdd3"
+  };
+  // ══════════════════════════════════════════
+
+  let app, db, unsubscribe;
+  let projects = [];
+  let editingId = null;
+
+  // ─── INIT ───
+  function initFirebase() {
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      document.getElementById('liveStatus').textContent = 'Live';
+      document.getElementById('configBanner').style.display = 'none';
+      startListener();
+      startRegistryListener();
+      hInitDate();
+      const hDateInp = document.getElementById('h_date');
+      if (hDateInp) hLoadDay(hDateInp.value || getTodayStr());
+    } catch (e) {
+      document.getElementById('liveStatus').textContent = 'Not Connected';
+      document.getElementById('liveStatus').style.color = 'var(--danger)';
+      showEmptyState();
+      console.warn('Firebase not configured:', e);
+    }
+  }
+
+  // ─── REAL-TIME LISTENER ───
+  function startListener() {
+    const q = query(collection(db, 'projects'), orderBy('createdAt', 'asc'));
+    unsubscribe = onSnapshot(q, (snapshot) => {
+      projects = [];
+      snapshot.forEach(d => projects.push({ id: d.id, ...d.data() }));
+      renderTables();
+    }, (err) => {
+      console.error(err);
+      toast('Database connection error', 'error');
+    });
+  }
+
+  // ─── RENDER ───
+  function renderTables() {
+    renderEditTable();
+    // Always clear view table before re-render to force full refresh
+    const vt = document.getElementById('viewTableBody');
+    if (vt) vt.innerHTML = '';
+    renderViewTable();
+    updateStats();
+  }
+
+  function renderEditTable() {
+    const tbody = document.getElementById('editTableBody');
+    document.getElementById('countBadge1').textContent = projects.length;
+
+    if (projects.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="8">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <p>No projects yet — add your first project above</p>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = projects.map((p, i) => `
+      <tr>
+        <td style="color:var(--text3);font-family:var(--mono);font-size:12px">${i + 1}</td>
+        <td><span class="project-num">${esc(p.number)}</span></td>
+        <td><span class="project-name">${esc(p.name)}</span></td>
+        <td><span class="location-tag">📍 ${esc(p.location)}</span></td>
+        <td><span class="engineer-chip">
+          <span class="engineer-avatar">${initials(p.engineer)}</span>
+          ${esc(p.engineer)}
+        </span></td>
+        <td><span class="engineer-chip">
+          <span class="engineer-avatar" style="background:linear-gradient(135deg,#00c27a,#00e5a0)">${initials(p.leader)}</span>
+          ${esc(p.leader)}
+        </span></td>
+        <td><span class="tech-count">${esc(p.techs)} 👷</span></td>
+        <td style="font-size:13px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.task)}</td>
+        <td style="font-size:12px;color:var(--accent)">${esc(p.car_type)}</td>
+        <td style="font-size:12px;color:var(--warn)">${esc(p.car_class)}</td>
+        <td style="font-size:12px;color:var(--text2);max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.notes)}</td>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--warn)">${fmtDate(p.date_from)}${p.date_to && p.date_to !== p.date_from ? " → " + fmtDate(p.date_to) : ""}</td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn btn-edit-ghost" onclick="window._openEdit('${p.id}')">✏️ Edit</button>
+            <button class="btn btn-danger-ghost" onclick="window._deleteProject('${p.id}')">🗑</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderViewTable(list, filterDay) {
+    const data = list !== undefined && list !== null ? list : projects;
+    const tbody = document.getElementById('viewTableBody');
+    const todayStr = getTodayStr();
+
+    // Sort projects before expanding
+    const sorted = [...data].sort((a, b) => {
+      if (sortMode === 'created') {
+        return (a.createdAt || 0) - (b.createdAt || 0);
+      } else {
+        // sort by date_from
+        const da = a.date_from || '9999';
+        const db2 = b.date_from || '9999';
+        return da.localeCompare(db2);
+      }
+    });
+
+    // Expand each project into one row per future/today day only
+    const rows = [];
+    sorted.forEach((p) => {
+      const days = getDateRange(p.date_from, p.date_to);
+      if (days.length === 0) {
+        if (!filterDay) rows.push({ p, day: null });
+      } else {
+        days.sort();
+        days.forEach(day => {
+          if (filterDay) {
+            // Show only the specific filtered day
+            if (day === filterDay) rows.push({ p, day });
+          } else {
+            // Show all future/today days
+            if (day >= todayStr) rows.push({ p, day });
+          }
+        });
+      }
+    });
+
+    document.getElementById('countBadge2').textContent = rows.length;
+
+    if (rows.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="9">
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <p>No current projects</p>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map((r, rowIdx) => `
+      <tr>
+        <td style="color:var(--text3);font-family:var(--mono);font-size:12px">${rowIdx + 1}</td>
+        <td><span class="project-num">${esc(r.p.number)}</span></td>
+        <td><span class="project-name">${esc(r.p.name)}</span></td>
+        <td><span class="location-tag">📍 ${esc(r.p.location)}</span></td>
+        <td><span class="engineer-chip">
+          <span class="engineer-avatar">${initials(r.p.engineer)}</span>
+          ${esc(r.p.engineer)}
+        </span></td>
+        <td><span class="engineer-chip">
+          <span class="engineer-avatar" style="background:linear-gradient(135deg,#00c27a,#00e5a0)">${initials(r.p.leader)}</span>
+          ${esc(r.p.leader)}
+        </span></td>
+        <td><span class="tech-count">${esc(r.p.techs)} 👷</span></td>
+        <td style="font-size:13px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.p.task)}</td>
+        <td style="font-size:12px;color:var(--accent)">${esc(r.p.car_type)}</td>
+        <td style="font-size:12px;color:var(--warn)">${esc(r.p.car_class)}</td>
+        <td style="font-size:12px;color:var(--text2);max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.p.notes)}</td>
+        <td style="font-family:var(--mono);font-size:12px;white-space:nowrap;" class="${r.day === todayStr ? 'today-cell' : 'date-cell'}">
+          ${r.day ? fmtDate(r.day) + (r.day === todayStr ? ' ◄ اليوم' : '') : '—'}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+
+  const MAX_TECHS = 15;
+
+  function updateStats(list) {
+    const data = list !== undefined ? list : projects;
+    const todayStr = getTodayStr();
+
+    // Count unique projects that have at least one future/today day
+    const activeProjects = data.filter(p => {
+      if (!p.date_from) return true;
+      const days = getDateRange(p.date_from, p.date_to);
+      return days.some(d => d >= todayStr);
+    });
+
+    const total = activeProjects.length;
+    const techs = activeProjects.reduce((s, p) => s + (parseInt(p.techs) || 0), 0);
+    const engineers = new Set(activeProjects.map(p => p.engineer).filter(Boolean)).size;
+    const diff = techs - MAX_TECHS;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-engineers').textContent = engineers;
+
+    // Techs count — red if over limit
+    const techEl = document.getElementById('stat-techs');
+    techEl.textContent = techs;
+    techEl.style.color = techs > MAX_TECHS ? 'var(--danger)' : 'var(--success)';
+
+    // Support card
+    const supportEl = document.getElementById('stat-support');
+    const supportCard = document.getElementById('support-card');
+    const supportSub = document.getElementById('support-sub');
+
+    if (techs > MAX_TECHS) {
+      supportEl.textContent = diff;
+      supportEl.style.color = 'var(--danger)';
+      supportCard.style.borderColor = 'rgba(255,68,85,0.4)';
+      supportCard.style.background = 'rgba(255,68,85,0.06)';
+      supportSub.textContent = MAX_TECHS + ' available / ' + techs + ' required';
+    } else {
+      supportEl.textContent = '✓';
+      supportEl.style.color = 'var(--success)';
+      supportCard.style.borderColor = 'rgba(0,229,160,0.3)';
+      supportCard.style.background = 'rgba(0,229,160,0.04)';
+      supportSub.textContent = 'Team is sufficient 👍';
+    }
+  }
+
+  function showEmptyState() {
+    ['editTableBody', 'viewTableBody'].forEach(id => {
+      document.getElementById(id).innerHTML = `
+        <tr><td colspan="8">
+          <div class="empty-state">
+            <div class="empty-icon">🔌</div>
+            <p>Firebase غير متصل — ضع الـ config الصح في الكود</p>
+          </div>
+        </td></tr>`;
+    });
+  }
+
+  // ─── SAVE ───
+  window.saveProject = async function () {
+    const data = getFormData('f_');
+    if (!data) return;
+    try {
+      await addDoc(collection(db, 'projects'), { ...data, createdAt: Date.now() });
+      clearForm();
+      toast('✅ Project added', 'success');
+    } catch (e) {
+      toast('❌ Save error: ' + e.message, 'error');
+    }
+  };
+
+  // ─── DELETE ───
+  window._deleteProject = async function (id) {
+    if (!confirm('Delete this project?')) return;
+    try {
+      await deleteDoc(doc(db, 'projects', id));
+      toast('🗑 Deleted', 'success');
+    } catch (e) {
+      toast('❌ Delete error', 'error');
+    }
+  };
+
+  // ─── OPEN EDIT MODAL ───
+  window._openEdit = function (id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    editingId = id;
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_name').value = p.name || '';
+    document.getElementById('edit_number').value = p.number || '';
+    document.getElementById('edit_location').value = p.location || '';
+    document.getElementById('edit_engineer').value = p.engineer || '';
+    document.getElementById('edit_leader').value = p.leader || '';
+    document.getElementById('edit_techs').value = p.techs || '';
+    document.getElementById('edit_task').value = p.task || '';
+    document.getElementById('edit_date_from').value = p.date_from || '';
+    document.getElementById('edit_date_to').value = p.date_to || '';
+    document.getElementById('edit_car_type').value = p.car_type || '';
+    document.getElementById('edit_car_class').value = p.car_class || '';
+    document.getElementById('edit_notes').value = p.notes || '';
+    document.getElementById('editModal').classList.add('show');
+    document.body.classList.add('modal-open');
+  };
+
+  window.closeModal = function () {
+    document.getElementById('editModal').classList.remove('show');
+    document.body.classList.remove('modal-open');
+    editingId = null;
+  };
+
+  // ─── UPDATE ───
+  window.updateProject = async function () {
+    if (!editingId) return;
+    const data = getFormData('edit_');
+    if (!data) return;
+    try {
+      await updateDoc(doc(db, 'projects', editingId), data);
+      closeModal();
+      toast('✅ Updated', 'success');
+    } catch (e) {
+      toast('❌ Update error', 'error');
+    }
+  };
+
+  // ─── HELPERS ───
+  function getFormData(prefix) {
+    const name     = document.getElementById(prefix + 'name').value.trim();
+    const number   = document.getElementById(prefix + 'number').value.trim();
+    const location = document.getElementById(prefix + 'location').value.trim();
+    const engineer = document.getElementById(prefix + 'engineer').value.trim();
+    const leader   = document.getElementById(prefix + 'leader').value.trim();
+    const techs    = document.getElementById(prefix + 'techs').value.trim();
+    const task      = document.getElementById(prefix + 'task').value.trim();
+    const date_from = document.getElementById(prefix + 'date_from').value;
+    const date_to   = document.getElementById(prefix + 'date_to').value;
+    const car_type  = document.getElementById(prefix + 'car_type').value;
+    const car_class = document.getElementById(prefix + 'car_class').value;
+    const notes     = document.getElementById(prefix + 'notes').value.trim();
+
+    if (!name || !number) {
+      toast('⚠️ Project name and number are required', 'error');
+      return null;
+    }
+    return { name, number, location, engineer, leader, techs, task, date_from, date_to, car_type, car_class, notes };
+  }
+
+  window.clearForm = function () {
+    ['f_name','f_number','f_location','f_engineer','f_leader','f_techs','f_task','f_date_from','f_date_to','f_notes']
+      .forEach(id => document.getElementById(id).value = '');
+    ['f_car_type','f_car_class'].forEach(id => document.getElementById(id).selectedIndex = 0);
+  };
+
+  function getTodayStr() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return y + '-' + m + '-' + day;
+  }
+
+  function getDateRange(from, to) {
+    if (!from) return [];
+    const start = new Date(from);
+    const end = to ? new Date(to) : start;
+    const days = [];
+    const cur = new Date(start);
+    while (cur <= end) {
+      days.push(cur.toISOString().split('T')[0]);
+      cur.setDate(cur.getDate() + 1);
+    }
+    return days;
+  }
+
+  function fmtDate(d) {
+    if (!d) return '<span style=\'color:var(--text3)\'>—</span>';
+    const parts = d.split('-');
+    if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
+    return d;
+  }
+
+  function esc(str) {
+    if (!str) return '<span style="color:var(--text3)">—</span>';
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function initials(name) {
+    if (!name) return '?';
+    return name.trim().split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+  }
+
+  // ─── TOAST ───
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show ' + type;
+    setTimeout(() => el.className = '', 3000);
+  }
+
+  // ─── TABS ───
+  window.switchTab = function(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    // Always re-render view table fresh when switching to it
+    if (name === 'view') {
+      renderViewTable();
+      updateStats();
+    }
+    if (name === 'projects') {
+      renderProjectsTable();
+    }
+  };
+
+  // ─── MODAL CLOSE ON OVERLAY CLICK ───
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  document.getElementById('projectModal').addEventListener('click', function(e) {
+    if (e.target === this) closeProjectModal();
+  });
+
+  // ─── DATE FILTER ───
+  window.applyDateFilter = function() {
+    const val = document.getElementById('filterDate').value;
+    document.getElementById('filterLabel').textContent = val ? '📅 ' + fmtDate(val) : '';
+    if (!val) { renderViewTable(); updateStats(); return; }
+    renderViewTable(null, val);
+    updateStats(projects.filter(p => {
+      const days = getDateRange(p.date_from, p.date_to);
+      return days.includes(val);
+    }));
+  };
+
+  window.clearDateFilter = function() {
+    document.getElementById('filterDate').value = '';
+    document.getElementById('filterLabel').textContent = '';
+    renderViewTable();
+    updateStats();
+  };
+
+  // ─── START ───
+  // ── THEME TOGGLE ──
+  window.toggleTheme = function() {
+    const isLight = document.getElementById('themeToggle').checked;
+    document.body.classList.toggle('light-mode', isLight);
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  };
+
+  // Restore saved theme
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light-mode');
+    setTimeout(() => {
+      const t = document.getElementById('themeToggle');
+      if (t) t.checked = true;
+    }, 0);
+  }
+
+  // ── SORT ──
+  let sortMode = 'day';
+
+  window.setSortMode = function(mode) {
+    sortMode = mode;
+    document.getElementById('sortDayBtn').style.borderColor = mode === 'day' ? 'var(--accent)' : '';
+    document.getElementById('sortDayBtn').style.color = mode === 'day' ? 'var(--accent)' : '';
+    document.getElementById('sortCreatedBtn').style.borderColor = mode === 'created' ? 'var(--accent)' : '';
+    document.getElementById('sortCreatedBtn').style.color = mode === 'created' ? 'var(--accent)' : '';
+    renderViewTable();
+    updateStats();
+  };
+
+  // ── EXPORT PDF ──
+  window.exportPDF = function() {
+    const filterVal = document.getElementById('filterDate').value;
+    const subtitle = filterVal
+      ? 'Projects for ' + fmtDate(filterVal)
+      : 'All Projects الحالية';
+    document.getElementById('printSubtitle').textContent = subtitle + ' — ' + new Date().toLocaleDateString('ar-EG');
+    window.print();
+  };
+
+  // ══════════════════════════════════════
+  // PROJECTS REGISTRY
+  // ══════════════════════════════════════
+  let projectRegistry = []; // {id, number, name, engineer, location}
+  let projectModalEditId = null;
+
+  function startRegistryListener() {
+    const q = query(collection(db, 'projectRegistry'), orderBy('createdAt', 'asc'));
+    onSnapshot(q, (snapshot) => {
+      projectRegistry = [];
+      snapshot.forEach(d => projectRegistry.push({ id: d.id, ...d.data() }));
+      renderProjectsTable();
+    });
+  }
+
+  function renderProjectsTable() {
+    const tbody = document.getElementById('projectsTableBody');
+    document.getElementById('countBadgeProjects').textContent = projectRegistry.length;
+    if (projectRegistry.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🗂</div><p>No projects registered yet</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = projectRegistry.map((p, i) => `
+      <tr>
+        <td style="color:var(--text3);font-family:var(--mono);font-size:12px;text-align:center">${i+1}</td>
+        <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="project-num">${esc(p.number)}</span></td>
+        <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="project-name">${esc(p.name)}</span></td>
+        <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="engineer-chip"><span class="engineer-avatar">${initials(p.engineer)}</span>${esc(p.engineer)}</span></td>
+        <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="location-tag">📍 ${esc(p.location)}</span></td>
+        <td style="text-align:center"><div class="actions-cell" style="justify-content:center">
+          <button class="btn btn-edit-ghost" onclick="openEditProjectModal('${p.id}')">✏️ Edit</button>
+          <button class="btn btn-danger-ghost" onclick="deleteProjectRegistry('${p.id}')">🗑</button>
+        </div></td>
+      </tr>
+    `).join('');
+  }
+
+  window.openAddProjectModal = function() {
+    projectModalEditId = null;
+    document.getElementById('projectModalTitle').textContent = '🗂 Add Project';
+    ['pm_number','pm_name','pm_engineer','pm_location'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('projectModal').classList.add('show');
+    document.body.classList.add('modal-open');
+  };
+
+  window.openEditProjectModal = function(id) {
+    const p = projectRegistry.find(x => x.id === id);
+    if (!p) return;
+    projectModalEditId = id;
+    document.getElementById('projectModalTitle').textContent = '✏️ Edit Project';
+    document.getElementById('pm_number').value = p.number || '';
+    document.getElementById('pm_name').value = p.name || '';
+    document.getElementById('pm_engineer').value = p.engineer || '';
+    document.getElementById('pm_location').value = p.location || '';
+    document.getElementById('projectModal').classList.add('show');
+    document.body.classList.add('modal-open');
+  };
+
+  window.closeProjectModal = function() {
+    document.getElementById('projectModal').classList.remove('show');
+    document.body.classList.remove('modal-open');
+    projectModalEditId = null;
+  };
+
+  window.saveProjectRegistry = async function() {
+    const number   = document.getElementById('pm_number').value.trim();
+    const name     = document.getElementById('pm_name').value.trim();
+    const engineer = document.getElementById('pm_engineer').value.trim();
+    const location = document.getElementById('pm_location').value.trim();
+    if (!number || !name) { toast('⚠️ Project number and name are required', 'error'); return; }
+    try {
+      if (projectModalEditId) {
+        await updateDoc(doc(db, 'projectRegistry', projectModalEditId), { number, name, engineer, location });
+        toast('✅ Project updated', 'success');
+      } else {
+        await addDoc(collection(db, 'projectRegistry'), { number, name, engineer, location, createdAt: Date.now() });
+        toast('✅ Project added to registry', 'success');
+      }
+      closeProjectModal();
+    } catch(e) { toast('❌ Error: ' + e.message, 'error'); }
+  };
+
+  window.deleteProjectRegistry = async function(id) {
+    if (!confirm('Delete this project from registry?')) return;
+    try {
+      await deleteDoc(doc(db, 'projectRegistry', id));
+      toast('🗑 Deleted', 'success');
+    } catch(e) { toast('❌ Delete error', 'error'); }
+  };
+
+  // Auto-fill when project number typed in Add form
+  window.autoFillProject = function() {
+    const num = document.getElementById('f_number').value.trim();
+    const match = projectRegistry.find(p => p.number.toLowerCase() === num.toLowerCase());
+    if (match) {
+      document.getElementById('f_name').value = match.name || '';
+      document.getElementById('f_engineer').value = match.engineer || '';
+      document.getElementById('f_location').value = match.location || '';
+      toast('✅ Project details auto-filled', 'success');
+    }
+  };
+
+  // Lock/unlock Car Type when Mawasalat selected
+  window.onCarClassChange = function(prefix) {
+    const cls = document.getElementById(prefix + 'car_class').value;
+    const typeEl = document.getElementById(prefix + 'car_type');
+    if (cls === 'مواصلات') {
+      typeEl.value = '';
+      typeEl.disabled = true;
+      typeEl.style.opacity = '0.4';
+      typeEl.style.cursor = 'not-allowed';
+    } else {
+      typeEl.disabled = false;
+      typeEl.style.opacity = '1';
+      typeEl.style.cursor = 'pointer';
+    }
+  };
+
+
+  // ══════════════════════════════════════
+  // HARAKA JS
+  // ══════════════════════════════════════
+  let h_lists = { eng:[], tech:[], office:[], vacation:[], sick:[] };
+  let h_pending = [];
+
+  function hInitDate() {
+    const inp = document.getElementById('h_date');
+    if (inp && !inp.value) inp.value = getTodayStr();
+  }
+
+  window.hGoToday = function() {
+    const inp = document.getElementById('h_date');
+    if (inp) { inp.value = getTodayStr(); hLoadDay(getTodayStr()); }
+  };
+
+  window.hAutoFillByNumber = function() {
+    const num = document.getElementById('h_number').value.trim();
+    const match = projectRegistry.find(p => p.number.toLowerCase() === num.toLowerCase());
+    if (match) { document.getElementById('h_project').value = match.name || ''; toast('Auto-filled', 'success'); }
+  };
+  window.hAutoFill = function() {};
+
+  window.hTagKey = function(e, type) {
+    if (e.key !== 'Enter') return;
+    const ids = { eng:'h_eng_input', tech:'h_tech_input', office:'h_office_input', vacation:'h_vacation_input', sick:'h_sick_input' };
+    const val = document.getElementById(ids[type]).value.trim();
+    if (!val) return;
+    h_lists[type].push(val);
+    document.getElementById(ids[type]).value = '';
+    hRenderTags(type);
+    e.preventDefault();
+  };
+
+  function hRenderTags(type) {
+    const wrapIds  = { eng:'h_eng_wrap', tech:'h_tech_wrap', office:'h_office_wrap', vacation:'h_vacation_wrap', sick:'h_sick_wrap' };
+    const inputIds = { eng:'h_eng_input', tech:'h_tech_input', office:'h_office_input', vacation:'h_vacation_input', sick:'h_sick_input' };
+    const wrap = document.getElementById(wrapIds[type]);
+    const inp  = document.getElementById(inputIds[type]);
+    if (!wrap || !inp) return;
+    wrap.innerHTML = '';
+    h_lists[type].forEach((name, i) => {
+      const tag = document.createElement('div');
+      tag.className = 'h-tag';
+      tag.textContent = name + ' ';
+      const btn = document.createElement('button');
+      btn.textContent = '×';
+      btn.onclick = () => { h_lists[type].splice(i,1); hRenderTags(type); };
+      tag.appendChild(btn);
+      wrap.appendChild(tag);
+    });
+    wrap.appendChild(inp);
+  }
+
+  window.hAddTaskRow = function() {
+    const wrap = document.getElementById('h_tasks_wrap');
+    const row = document.createElement('div');
+    row.className = 'h-task-row';
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.placeholder = '▪️ المهمة...';
+    const btn = document.createElement('button');
+    btn.className = 'btn-icon'; btn.textContent = '×';
+    btn.onclick = () => row.remove();
+    row.appendChild(inp); row.appendChild(btn);
+    wrap.appendChild(row); inp.focus();
+  };
+
+  function hGetTasks() {
+    return Array.from(document.querySelectorAll('#h_tasks_wrap input')).map(i=>i.value.trim()).filter(Boolean);
+  }
+
+  window.hAddEntry = function() {
+    const project = document.getElementById('h_project').value.trim();
+    const number  = document.getElementById('h_number').value.trim();
+    if (!project && !number) { toast('اكتب اسم أو رقم المشروع', 'error'); return; }
+    h_pending.push({
+      project, number,
+      car: document.getElementById('h_car').value,
+      carDetail: document.getElementById('h_car_detail').value.trim(),
+      engineers: [...h_lists.eng], technicians: [...h_lists.tech],
+      tasks: hGetTasks(),
+      coord: document.getElementById('h_coord').value.trim(),
+      depart: document.getElementById('h_depart').value.trim(),
+    });
+    hClearEntry(); hRenderPending(); toast('تمت الإضافة', 'success');
+  };
+
+  window.hClearEntry = function() {
+    ['h_project','h_number','h_car_detail','h_coord','h_depart'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('h_car').selectedIndex = 0;
+    h_lists.eng = []; h_lists.tech = [];
+    hRenderTags('eng'); hRenderTags('tech');
+    document.getElementById('h_tasks_wrap').innerHTML = '';
+  };
+
+  function hRenderPending() {
+    const wrap = document.getElementById('h_pending_wrap');
+    if (!h_pending.length) { wrap.innerHTML=''; return; }
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">Staged ('+h_pending.length+')</div>' +
+      h_pending.map((e,i) => '<div class="h-pending-item"><div><span style="font-weight:600;">🏗️ '+esc(e.project)+'</span>'+(e.number?' <span class="project-num">'+esc(e.number)+'</span>':'')+' <span style="font-size:12px;color:var(--text2);">🚘 '+esc(e.car)+'</span></div><button class="btn btn-danger-ghost" style="font-size:11px;" onclick="hRemovePending('+i+')">Remove</button></div>').join('');
+  }
+
+  window.hRemovePending = function(i) { h_pending.splice(i,1); hRenderPending(); };
+
+  window.hPublish = async function() {
+    const dateVal = document.getElementById('h_date').value;
+    if (!dateVal) { toast('اختار التاريخ أول', 'error'); return; }
+    if (!h_pending.length && !h_lists.office.length && !h_lists.vacation.length && !h_lists.sick.length) {
+      toast('مفيش حاجة تتحفظ', 'error'); return;
+    }
+    try {
+      await setDoc(doc(db,'haraka',dateVal), {
+        date:dateVal, publishedAt:Date.now(),
+        entries:[...h_pending],
+        office:[...h_lists.office], vacation:[...h_lists.vacation], sick:[...h_lists.sick],
+      });
+      h_pending=[]; h_lists.office=[]; h_lists.vacation=[]; h_lists.sick=[];
+      hRenderPending();
+      ['office','vacation','sick'].forEach(t=>hRenderTags(t));
+      toast('✅ تم الحفظ!', 'success');
+      hLoadDay(dateVal);
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  function hLoadDay(dateStr) {
+    if (!db) return;
+    onSnapshot(doc(db,'haraka',dateStr), snap => {
+      hRenderFeed(snap.exists()?snap.data():null, dateStr);
+    });
+  }
+
+  function hFmtDateAr(str) {
+    if (!str) return '';
+    const [y,m,d] = str.split('-');
+    const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    return 'حركة يوم ' + days[new Date(str+'T00:00:00').getDay()] + ' الموافق ' + d+'/'+m+'/'+y;
+  }
+
+  function hRenderFeed(data, dateStr) {
+    const feed = document.getElementById('h_feed');
+    if (!feed) return;
+    if (!data) { feed.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>مفيش حركة لهذا اليوم</p></div>'; return; }
+    const confirmData = data.confirmations || {};
+    let html = '<div class="haraka-date-banner">'+hFmtDateAr(data.date)+'</div><div class="haraka-feed">';
+
+    (data.entries||[]).forEach((e,ei) => {
+      const carIcon = {مواصلات:'🚌',Sedan:'🚗',Van:'🚐',ايجار:'🚕'}[e.car]||'🚘';
+      const needsCar = e.car !== 'مواصلات';
+      const confirmed = confirmData[ei];
+      html += '<div class="haraka-entry'+(needsCar&&!confirmed?' needs-confirm':'')+'">';
+      html += '<div class="haraka-project-name">🏗️ '+esc(e.project)+(e.number?' <span class="haraka-project-num">'+esc(e.number)+'</span>':'')+' </div>';
+      html += '<div class="haraka-row">'+carIcon+' '+esc(e.car)+(e.carDetail?' — '+esc(e.carDetail):'')+' </div>';
+      if (e.engineers&&e.engineers.length) {
+        html += '<div class="haraka-row">';
+        e.engineers.forEach(n=>{html+='<span class="haraka-person engineer">👨🏻‍💻 م '+esc(n)+'</span>';});
+        html += '</div>';
+      }
+      if (e.technicians&&e.technicians.length) {
+        html += '<div class="haraka-row">';
+        e.technicians.forEach(n=>{html+='<span class="haraka-person">👷🏻‍♂️ '+esc(n)+'</span>';});
+        html += '</div>';
+      }
+      if (e.tasks&&e.tasks.length) { html+='<div class="haraka-tasks">'; e.tasks.forEach(t=>{html+='<div class="haraka-task"><span>▪️</span><span>'+esc(t)+'</span></div>';}); html+='</div>'; }
+      if (e.coord)  html+='<div class="haraka-row">📞 التنسيق مع '+esc(e.coord)+'</div>';
+      if (e.depart) html+='<div class="haraka-row">🕐 التحرك الساعة '+esc(e.depart)+'</div>';
+      if (needsCar) {
+        if (confirmed) html+='<div class="confirm-name">✅ تم التنسيق بواسطة '+esc(confirmed.by)+' الساعة '+confirmed.time+'</div>';
+        else html+='<button class="confirm-btn" onclick="hConfirmDriver(''+dateStr+'','+ei+')">🚗 تم التنسيق مع السواق</button>';
+      }
+      // Edit + Delete buttons
+      html += '<div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end;">';
+      html += '<button onclick="hDeleteEntry(\''+dateStr+'\','+ei+')" style="background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:var(--font);">🗑 Delete</button>';
+      html += '</div>';
+      html += '</div><hr style="border:none;border-top:1px solid var(--border);margin:0;">';
+    });
+
+    const showSection = (title, items, col, chipStyle) => {
+      html += '<div class="haraka-entry" style="border-right-color:'+col+';direction:rtl;">';
+      html += '<div class="haraka-project-name" style="flex-direction:row-reverse;justify-content:flex-end;">'+title+'</div>';
+      if (items&&items.length) {
+        html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;justify-content:flex-end;">';
+        items.forEach(n=>{html+='<span style="'+chipStyle+'">'+esc(n)+'</span>';});
+        html+='</div>';
+      } else html+='<div style="font-size:12px;color:var(--text3);">—</div>';
+      html += '</div>';
+    };
+    showSection('🏢 Office', data.office, 'var(--accent2)', 'background:rgba(0,119,255,0.1);border:1px solid rgba(0,119,255,0.25);color:#60a5fa;border-radius:20px;padding:3px 10px;font-size:12px;');
+    showSection('😴 Annual Leave', data.vacation, 'var(--warn)', 'background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.3);color:var(--warn);border-radius:20px;padding:3px 10px;font-size:12px;');
+    showSection('🤒 Sick Leave', data.sick, 'var(--danger)', 'background:rgba(255,68,85,0.08);border:1px solid rgba(255,68,85,0.25);color:var(--danger);border-radius:20px;padding:3px 10px;font-size:12px;');
+
+    html += '</div>';
+    if (data.publishedAt) html+='<div style="text-align:center;font-size:11px;color:var(--text3);font-family:var(--mono);padding:14px;">Saved at '+new Date(data.publishedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'</div>';
+    feed.innerHTML = html;
+  }
+
+  // ── CONFIRM DRIVER ──
+  window.hDeleteEntry = async function(dateStr, entryIdx) {
+    if (!confirm('حذف هذا المشروع من الحركة؟')) return;
+    try {
+      const docRef = doc(db, 'haraka', dateStr);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) return;
+      const d = snap.data();
+      const entries = [...(d.entries || [])];
+      entries.splice(entryIdx, 1);
+      // Also remove confirmation for this entry
+      const confirmations = {...(d.confirmations || {})};
+      delete confirmations[entryIdx];
+      // Re-index confirmations
+      const newConf = {};
+      Object.keys(confirmations).forEach(k => {
+        const ki = parseInt(k);
+        if (ki < entryIdx) newConf[ki] = confirmations[k];
+        else if (ki > entryIdx) newConf[ki-1] = confirmations[k];
+      });
+      await updateDoc(docRef, { entries, confirmations: newConf });
+      toast('🗑 تم الحذف', 'success');
+    } catch(err) { toast('Error: '+err.message,'error'); }
+  };
+
+  window.hConfirmDriver = async function(dateStr, entryIdx) {
+    const name = prompt('اسمك؟');
+    if (!name || !name.trim()) return;
+    const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    try {
+      const docRef = doc(db, 'haraka', dateStr);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) return;
+      const d = snap.data();
+      const confirmations = d.confirmations || {};
+      confirmations[entryIdx] = { by: name.trim(), time: now };
+      await updateDoc(docRef, { confirmations });
+      toast('✅ تم تسجيل التنسيق', 'success');
+    } catch(err) { toast('Error: ' + err.message, 'error'); }
+  };
+
+  initFirebase();
+  // haraka init in startRegistryListener
+
+  // ── AUTO CLEANUP at midnight ──
+  async function cleanupPastDays() {
+    if (!db) return;
+    const todayStr = getTodayStr();
+    for (const p of projects) {
+      if (!p.date_from) continue;
+      const days = getDateRange(p.date_from, p.date_to);
+      const future = days.filter(d => d >= todayStr);
+      if (future.length === 0) {
+        try { await deleteDoc(doc(db, 'projects', p.id)); } catch(e) {}
+      } else if (future[0] !== p.date_from) {
+        try { await updateDoc(doc(db, 'projects', p.id), { date_from: future[0] }); } catch(e) {}
+      }
+    }
+  }
+
+  function scheduleCleanup() {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 1, 0);
+    setTimeout(() => {
+      cleanupPastDays();
+      setInterval(cleanupPastDays, 24 * 60 * 60 * 1000);
+    }, midnight - now);
+  }
+
+  setTimeout(() => { cleanupPastDays(); scheduleCleanup(); }, 3000);
+</script>
+
+<!-- PWA INSTALL BANNER -->
+<div id="installBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#13161e;border-top:1px solid #2a3040;padding:16px 20px;z-index:9998;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -8px 32px rgba(0,0,0,0.5);">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="width:44px;height:44px;background:linear-gradient(135deg,#0077ff,#00c2ff);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#000;font-family:monospace;flex-shrink:0;">AV</div>
+    <div>
+      <div style="font-size:14px;font-weight:600;color:#e8eaf0;">Install App</div>
+      <div style="font-size:12px;color:#8892a4;">AV Nassif — Project Manager</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;flex-shrink:0">
+    <button onclick="document.getElementById('installBanner').style.display='none'" style="background:transparent;border:1px solid #2a3040;color:#8892a4;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;">No</button>
+    <button id="installBtn" style="background:linear-gradient(135deg,#0077ff,#00c2ff);border:none;color:#000;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;">Install ⬇</button>
+  </div>
+</div>
+
+<script>
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const b = document.getElementById('installBanner');
+    b.style.display = 'flex';
+  });
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('installBanner').style.display = 'none';
+  });
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('installBanner').style.display = 'none';
+  });
+  if ('serviceWorker' in navigator) {
+    const swCode = `const CACHE='av-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])))});self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))});`;
+    const blob = new Blob([swCode],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+  }
+</script>
+</body>
+</html>
