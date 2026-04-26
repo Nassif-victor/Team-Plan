@@ -766,15 +766,16 @@
   #panel-haraka input, #panel-haraka select, #panel-haraka .h-bare-input {
     text-align: right; direction: rtl;
   }
-  .haraka-feed { display:flex; flex-direction:column; gap:0; margin-top:20px; direction:rtl; text-align:right; }
-  .haraka-entry { direction:rtl; text-align:right; }
-  .haraka-project-name { justify-content:flex-end; flex-direction:row-reverse; }
-  .haraka-row { flex-direction:row-reverse; justify-content:flex-end; }
+  .haraka-feed { display:flex; flex-direction:column; gap:0; margin-top:20px; }
+  .haraka-entry { direction:rtl; text-align:right; border-left:none !important; border-right:3px solid var(--success); }
+  .haraka-entry.needs-confirm { border-right-color:var(--danger) !important; border-left:none !important; }
+  .haraka-project-name { flex-direction:row-reverse; }
+  .haraka-row { flex-direction:row-reverse; }
   .haraka-tasks { direction:rtl; }
-  .haraka-date-banner { direction:rtl; }
+  .haraka-date-banner { direction:rtl; text-align:center; }
   .haraka-entry {
     background:var(--card); border:1px solid var(--border);
-    border-left:3px solid var(--success);
+    border-right:3px solid var(--success);
     padding:18px 20px;
   }
   .haraka-entry.needs-confirm { border-left-color:var(--danger)!important; box-shadow:0 0 0 2px rgba(255,68,85,0.3); }
@@ -2105,7 +2106,7 @@
     });
 
     const showSection = (title, items, col, chipStyle) => {
-      html += '<div class="haraka-entry" style="border-left-color:'+col+';direction:rtl;">';
+      html += '<div class="haraka-entry" style="border-right-color:'+col+';direction:rtl;">';
       html += '<div class="haraka-project-name" style="flex-direction:row-reverse;justify-content:flex-end;">'+title+'</div>';
       if (items&&items.length) {
         html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;justify-content:flex-end;">';
@@ -2122,46 +2123,6 @@
     if (data.publishedAt) html+='<div style="text-align:center;font-size:11px;color:var(--text3);font-family:var(--mono);padding:14px;">Saved at '+new Date(data.publishedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'</div>';
     feed.innerHTML = html;
   }
-
-  window.hDeleteEntry = async function(dateStr, entryIdx) {
-    if (!confirm('حذف هذا المشروع من الحركة؟')) return;
-    try {
-      const docRef = doc(db, 'haraka', dateStr);
-      const snap = await getDoc(docRef);
-      if (!snap.exists()) return;
-      const d = snap.data();
-      const entries = [...(d.entries || [])];
-      entries.splice(entryIdx, 1);
-      // Also remove confirmation for this entry
-      const confirmations = {...(d.confirmations || {})};
-      delete confirmations[entryIdx];
-      // Re-index confirmations
-      const newConf = {};
-      Object.keys(confirmations).forEach(k => {
-        const ki = parseInt(k);
-        if (ki < entryIdx) newConf[ki] = confirmations[k];
-        else if (ki > entryIdx) newConf[ki-1] = confirmations[k];
-      });
-      await updateDoc(docRef, { entries, confirmations: newConf });
-      toast('🗑 تم الحذف', 'success');
-    } catch(err) { toast('Error: '+err.message,'error'); }
-  };
-
-  window.hConfirmDriver = async function(dateStr, entryIdx) {
-    const name = prompt('اسمك؟');
-    if (!name) return;
-    const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    try {
-      const docRef = doc(db,'haraka',dateStr);
-      const snap = await getDoc(docRef);
-      if (!snap.exists()) return;
-      const d = snap.data();
-      const confirmations = d.confirmations || {};
-      confirmations[entryIdx] = { by:name, time:now };
-      await updateDoc(docRef, { confirmations });
-      toast('✅ تم تسجيل التنسيق', 'success');
-    } catch(e) { toast('Error: '+e.message,'error'); }
-  };
 
   // ── CONFIRM DRIVER ──
   window.hDeleteEntry = async function(dateStr, entryIdx) {
