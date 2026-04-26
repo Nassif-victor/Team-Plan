@@ -1330,21 +1330,7 @@
   let editingId = null;
 
   // ─── INIT ───
-  function initFirebase() {
-    try {
-      app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-      document.getElementById('liveStatus').textContent = 'Live';
-      document.getElementById('configBanner').style.display = 'none';
-      startListener();
-      startRegistryListener();
-    } catch (e) {
-      document.getElementById('liveStatus').textContent = 'Not Connected';
-      document.getElementById('liveStatus').style.color = 'var(--danger)';
-      showEmptyState();
-      console.warn('Firebase not configured:', e);
-    }
-  }
+
 
   // ─── REAL-TIME LISTENER ───
   function startListener() {
