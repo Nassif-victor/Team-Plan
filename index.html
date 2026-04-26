@@ -2096,7 +2096,7 @@
       if (e.depart) html+='<div class="haraka-row">🕐 التحرك الساعة '+esc(e.depart)+'</div>';
       if (needsCar) {
         if (confirmed) html+='<div class="confirm-name">✅ تم التنسيق بواسطة '+esc(confirmed.by)+' الساعة '+confirmed.time+'</div>';
-        else html+='<button class="confirm-btn" onclick="hConfirmDriver(''+dateStr+'','+ei+')">🚗 تم التنسيق مع السواق</button>';
+        else html+='<button class="confirm-btn" onclick="hConfirmDriver(&apos;'+dateStr+'&apos;,'+ei+')">🚗 تم التنسيق مع السواق</button>';
       }
       // Edit + Delete buttons
       html += '<div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end;">';
