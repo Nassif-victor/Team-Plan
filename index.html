@@ -763,30 +763,18 @@
 
   /* ── HARAKA ── */
   #panel-haraka { direction: rtl; }
-  #panel-haraka input, #panel-haraka select, #panel-haraka .h-bare-input {
-    text-align: right; direction: rtl;
-  }
+  #panel-haraka input, #panel-haraka select, #panel-haraka .h-bare-input { text-align:right; direction:rtl; }
   .haraka-feed { display:flex; flex-direction:column; gap:0; margin-top:20px; }
-  .haraka-entry { direction:rtl; text-align:right; border-left:none !important; border-right:3px solid var(--success); }
-  .haraka-entry.needs-confirm { border-right-color:var(--danger) !important; border-left:none !important; }
-  .haraka-project-name { flex-direction:row-reverse; }
-  .haraka-row { flex-direction:row-reverse; }
-  .haraka-tasks { direction:rtl; }
-  .haraka-date-banner { direction:rtl; text-align:center; }
-  .haraka-entry {
-    background:var(--card); border:1px solid var(--border);
-    border-right:3px solid var(--success);
-    padding:18px 20px;
-  }
-  .haraka-entry.needs-confirm { border-left-color:var(--danger)!important; box-shadow:0 0 0 2px rgba(255,68,85,0.3); }
-  .haraka-project-name { font-size:16px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .haraka-entry { direction:rtl; text-align:right; background:var(--card); border:1px solid var(--border); border-right:3px solid var(--success); padding:18px 20px; }
+  .haraka-entry.needs-confirm { border-right-color:var(--danger)!important; box-shadow:0 0 0 2px rgba(255,68,85,0.25); }
+  .haraka-project-name { font-size:16px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex-direction:row-reverse; }
   .haraka-project-num { font-family:var(--mono); font-size:12px; color:var(--accent); background:rgba(0,194,255,0.1); border:1px solid rgba(0,194,255,0.2); border-radius:4px; padding:1px 8px; }
-  .haraka-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2); padding:3px 0; flex-wrap:wrap; }
+  .haraka-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2); padding:3px 0; flex-wrap:wrap; flex-direction:row-reverse; }
   .haraka-person { display:inline-flex; align-items:center; gap:5px; background:rgba(0,229,160,0.08); border:1px solid rgba(0,229,160,0.2); color:var(--success); border-radius:20px; padding:3px 10px; font-size:12px; margin:2px; }
   .haraka-person.engineer { background:rgba(0,119,255,0.1); border-color:rgba(0,119,255,0.25); color:#60a5fa; }
-  .haraka-tasks { margin-top:8px; display:flex; flex-direction:column; gap:4px; }
+  .haraka-tasks { margin-top:8px; display:flex; flex-direction:column; gap:4px; direction:rtl; }
   .haraka-task { font-size:13px; color:var(--text2); display:flex; align-items:flex-start; gap:6px; }
-  .haraka-date-banner { text-align:center; font-size:13px; font-weight:600; color:var(--accent); font-family:var(--mono); margin-bottom:8px; padding:10px; background:rgba(0,194,255,0.06); border:1px solid rgba(0,194,255,0.15); border-radius:8px; }
+  .haraka-date-banner { text-align:center; font-size:13px; font-weight:600; color:var(--accent); font-family:var(--mono); margin-bottom:8px; padding:10px; background:rgba(0,194,255,0.06); border:1px solid rgba(0,194,255,0.15); border-radius:8px; direction:rtl; }
   .h-builder { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:16px; }
   .h-section-label { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-family:var(--mono); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
   .h-section-label::before { content:''; width:3px; height:13px; background:linear-gradient(var(--accent2),var(--accent)); border-radius:2px; display:inline-block; }
@@ -794,38 +782,18 @@
   .h-tag { display:inline-flex; align-items:center; gap:5px; background:var(--bg); border:1px solid var(--border2); border-radius:20px; padding:3px 10px; font-size:12px; }
   .h-tag button { background:none; border:none; color:var(--text3); cursor:pointer; font-size:12px; line-height:1; padding:0; }
   .h-tag button:hover { color:var(--danger); }
-  .h-bare-input { background:none; border:none; outline:none; font-size:13px; color:var(--text); min-width:120px; flex:1; font-family:var(--font); }
+  .h-bare-input { background:none; border:none; outline:none; font-size:13px; color:var(--text); min-width:80px; flex:1; font-family:var(--font); }
   .h-task-row { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
-  .h-task-row input { flex:1; background:var(--bg3); border:1px solid var(--border2); border-radius:7px; padding:8px 12px; color:var(--text); font-family:var(--font); font-size:13px; outline:none; }
+  .h-task-row input { flex:1; background:var(--bg3); border:1px solid var(--border2); border-radius:7px; padding:8px 12px; color:var(--text); font-family:var(--font); font-size:13px; outline:none; direction:rtl; }
   .h-task-row input:focus { border-color:var(--accent2); }
   .btn-add-task-h { background:transparent; border:1px dashed var(--border2); color:var(--text3); border-radius:7px; padding:7px 12px; font-size:12px; cursor:pointer; width:100%; font-family:var(--font); transition:all 0.2s; margin-top:4px; }
   .btn-add-task-h:hover { border-color:var(--accent); color:var(--accent); }
   .h-pending-item { background:var(--bg); border:1px dashed var(--border2); border-radius:8px; padding:10px 14px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .btn-save-h { width:100%; background:linear-gradient(135deg,#00c27a,#00e5a0); color:#000; border:none; border-radius:10px; padding:13px; font-family:var(--font); font-size:14px; font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
   .btn-save-h:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,229,160,0.3); }
-  .confirm-btn { display:inline-flex; align-items:center; gap:6px; background:transparent; border:1px solid rgba(0,229,160,0.4); color:var(--success); border-radius:8px; padding:5px 12px; font-size:12px; cursor:pointer; font-family:var(--font); transition:all 0.2s; margin-top:8px; }
+  .confirm-btn { display:inline-flex; align-items:center; gap:6px; background:transparent; border:1px solid rgba(0,229,160,0.4); color:var(--success); border-radius:8px; padding:6px 14px; font-size:12px; cursor:pointer; font-family:var(--font); transition:all 0.2s; margin-top:10px; }
   .confirm-btn:hover { background:rgba(0,229,160,0.1); }
-  .confirm-name { font-size:11px; color:var(--success); font-family:var(--mono); margin-top:6px; }
-
-  .haraka-entry.needs-confirm {
-    border-left-color: var(--danger) !important;
-    box-shadow: 0 0 0 2px rgba(255,68,85,0.25);
-  }
-  .confirm-btn {
-    display:inline-flex; align-items:center; gap:6px;
-    background:transparent; border:1px solid rgba(0,229,160,0.4);
-    color:var(--success); border-radius:8px; padding:6px 14px;
-    font-size:12px; cursor:pointer; font-family:var(--font);
-    transition:all 0.2s; margin-top:10px;
-  }
-  .confirm-btn:hover { background:rgba(0,229,160,0.1); }
-  .confirm-name {
-    font-size:12px; color:var(--success);
-    font-family:var(--mono); margin-top:8px;
-    padding:6px 10px; background:rgba(0,229,160,0.08);
-    border-radius:6px; border:1px solid rgba(0,229,160,0.2);
-  }
-
+  .confirm-name { font-size:12px; color:var(--success); font-family:var(--mono); margin-top:8px; padding:6px 10px; background:rgba(0,229,160,0.08); border-radius:6px; border:1px solid rgba(0,229,160,0.2); }
 </style>
 </head>
 <body>
@@ -1165,15 +1133,15 @@
           <input type="text" id="h_car_detail" placeholder="اسم السواق / اللوحة"></div>
       </div>
       <div class="field" style="margin-bottom:12px;">
-        <label>👨🏻‍💻 Engineers (م)</label>
+        <label>👨🏻‍💻 Engineers</label>
         <div class="h-tags-box" id="h_eng_wrap" onclick="document.getElementById('h_eng_input').focus()">
-          <input class="h-bare-input" id="h_eng_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'eng')">
+          <input class="h-bare-input" id="h_eng_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'eng')">
         </div>
       </div>
       <div class="field" style="margin-bottom:12px;">
         <label>👷🏻‍♂️ Technicians</label>
         <div class="h-tags-box" id="h_tech_wrap" onclick="document.getElementById('h_tech_input').focus()">
-          <input class="h-bare-input" id="h_tech_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'tech')">
+          <input class="h-bare-input" id="h_tech_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'tech')">
         </div>
       </div>
       <div class="field" style="margin-bottom:12px;">
@@ -1199,19 +1167,19 @@
       <div class="form-card" style="padding:14px;">
         <div class="form-card-title" style="margin-bottom:8px;">🏢 Office</div>
         <div class="h-tags-box" id="h_office_wrap" onclick="document.getElementById('h_office_input').focus()">
-          <input class="h-bare-input" id="h_office_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'office')">
+          <input class="h-bare-input" id="h_office_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'office')">
         </div>
       </div>
       <div class="form-card" style="padding:14px;">
         <div class="form-card-title" style="margin-bottom:8px;">😴 Annual Leave</div>
         <div class="h-tags-box" id="h_vacation_wrap" onclick="document.getElementById('h_vacation_input').focus()">
-          <input class="h-bare-input" id="h_vacation_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'vacation')">
+          <input class="h-bare-input" id="h_vacation_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'vacation')">
         </div>
       </div>
       <div class="form-card" style="padding:14px;">
         <div class="form-card-title" style="margin-bottom:8px;">🤒 Sick Leave</div>
         <div class="h-tags-box" id="h_sick_wrap" onclick="document.getElementById('h_sick_input').focus()">
-          <input class="h-bare-input" id="h_sick_input" style="direction:rtl;text-align:right;" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'sick')">
+          <input class="h-bare-input" id="h_sick_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'sick')">
         </div>
       </div>
     </div>
@@ -1223,7 +1191,6 @@
     </div>
 
     <button class="btn-save-h" onclick="hPublish()">💾 Save الحركة</button>
-
     <div id="h_feed" style="margin-top:24px;"></div>
   </div>
 
@@ -1342,19 +1309,19 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
     getFirestore, collection, addDoc, getDocs,
-    deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, setDoc
+    deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, setDoc, getDoc
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   // ══════════════════════════════════════════
   // 🔴 ضع الـ Firebase Config بتاعك هنا
   // ══════════════════════════════════════════
   const firebaseConfig = {
-    apiKey: "AIzaSyC6ZG0-eq-bQR-240YaG8Og6T3iJUnhT_M",
-    authDomain: "team-plan-21013.firebaseapp.com",
-    projectId: "team-plan-21013",
-    storageBucket: "team-plan-21013.firebasestorage.app",
-    messagingSenderId: "349412644778",
-    appId: "1:349412644778:web:77de28edbc64a1db90fdd3"
+    apiKey: "AIzaSyCYEtHREe9zHk0ZEXtNIj9eNMDx5gawJvI",
+    authDomain: "daily-project-management.firebaseapp.com",
+    projectId: "daily-project-management",
+    storageBucket: "daily-project-management.firebasestorage.app",
+    messagingSenderId: "1031583044973",
+    appId: "1:1031583044973:web:37a375905a8b975297b664"
   };
   // ══════════════════════════════════════════
 
@@ -1371,9 +1338,6 @@
       document.getElementById('configBanner').style.display = 'none';
       startListener();
       startRegistryListener();
-      hInitDate();
-      const hDateInp = document.getElementById('h_date');
-      if (hDateInp) hLoadDay(hDateInp.value || getTodayStr());
     } catch (e) {
       document.getElementById('liveStatus').textContent = 'Not Connected';
       document.getElementById('liveStatus').style.color = 'var(--danger)';
@@ -1990,7 +1954,7 @@
     const inp = document.createElement('input');
     inp.type = 'text'; inp.placeholder = '▪️ المهمة...';
     const btn = document.createElement('button');
-    btn.className = 'btn-icon'; btn.textContent = '×';
+    btn.textContent = '×'; btn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--danger);font-size:16px;';
     btn.onclick = () => row.remove();
     row.appendChild(inp); row.appendChild(btn);
     wrap.appendChild(row); inp.focus();
@@ -2013,7 +1977,7 @@
       coord: document.getElementById('h_coord').value.trim(),
       depart: document.getElementById('h_depart').value.trim(),
     });
-    hClearEntry(); hRenderPending(); toast('تمت الإضافة', 'success');
+    hClearEntry(); hRenderPending(); toast('تمت الإضافة ✅', 'success');
   };
 
   window.hClearEntry = function() {
@@ -2081,38 +2045,26 @@
       html += '<div class="haraka-entry'+(needsCar&&!confirmed?' needs-confirm':'')+'">';
       html += '<div class="haraka-project-name">🏗️ '+esc(e.project)+(e.number?' <span class="haraka-project-num">'+esc(e.number)+'</span>':'')+' </div>';
       html += '<div class="haraka-row">'+carIcon+' '+esc(e.car)+(e.carDetail?' — '+esc(e.carDetail):'')+' </div>';
-      if (e.engineers&&e.engineers.length) {
-        html += '<div class="haraka-row">';
-        e.engineers.forEach(n=>{html+='<span class="haraka-person engineer">👨🏻‍💻 م '+esc(n)+'</span>';});
-        html += '</div>';
-      }
-      if (e.technicians&&e.technicians.length) {
-        html += '<div class="haraka-row">';
-        e.technicians.forEach(n=>{html+='<span class="haraka-person">👷🏻‍♂️ '+esc(n)+'</span>';});
-        html += '</div>';
-      }
+      if (e.engineers&&e.engineers.length) { html+='<div class="haraka-row">'; e.engineers.forEach(n=>{html+='<span class="haraka-person engineer">👨🏻‍💻 م '+esc(n)+'</span>';}); html+='</div>'; }
+      if (e.technicians&&e.technicians.length) { html+='<div class="haraka-row">'; e.technicians.forEach(n=>{html+='<span class="haraka-person">👷🏻‍♂️ '+esc(n)+'</span>';}); html+='</div>'; }
       if (e.tasks&&e.tasks.length) { html+='<div class="haraka-tasks">'; e.tasks.forEach(t=>{html+='<div class="haraka-task"><span>▪️</span><span>'+esc(t)+'</span></div>';}); html+='</div>'; }
       if (e.coord)  html+='<div class="haraka-row">📞 التنسيق مع '+esc(e.coord)+'</div>';
       if (e.depart) html+='<div class="haraka-row">🕐 التحرك الساعة '+esc(e.depart)+'</div>';
       if (needsCar) {
         if (confirmed) html+='<div class="confirm-name">✅ تم التنسيق بواسطة '+esc(confirmed.by)+' الساعة '+confirmed.time+'</div>';
-        else html+='<button class="confirm-btn" onclick="hConfirmDriver(&apos;'+dateStr+'&apos;,'+ei+')">🚗 تم التنسيق مع السواق</button>';
+        else html+='<button class="confirm-btn" onclick="hConfirmDriver(\'' + dateStr + '\','+ei+')">🚗 تم التنسيق مع السواق</button>';
       }
-      // Edit + Delete buttons
-      html += '<div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end;">';
-      html += '<button onclick="hDeleteEntry(\''+dateStr+'\','+ei+')" style="background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:var(--font);">🗑 Delete</button>';
+      html += '<div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-start;">';
+      html += '<button onclick="hDeleteEntry(this.getAttribute(\'data-d\'),parseInt(this.getAttribute(\'data-i\')))" data-d="'+dateStr+'" data-i="'+ei+'" style="background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🗑 حذف</button>';
       html += '</div>';
       html += '</div><hr style="border:none;border-top:1px solid var(--border);margin:0;">';
     });
 
     const showSection = (title, items, col, chipStyle) => {
-      html += '<div class="haraka-entry" style="border-right-color:'+col+';direction:rtl;">';
-      html += '<div class="haraka-project-name" style="flex-direction:row-reverse;justify-content:flex-end;">'+title+'</div>';
-      if (items&&items.length) {
-        html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;justify-content:flex-end;">';
-        items.forEach(n=>{html+='<span style="'+chipStyle+'">'+esc(n)+'</span>';});
-        html+='</div>';
-      } else html+='<div style="font-size:12px;color:var(--text3);">—</div>';
+      html += '<div class="haraka-entry" style="border-right-color:'+col+';">';
+      html += '<div class="haraka-project-name">'+title+'</div>';
+      if (items&&items.length) { html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">'; items.forEach(n=>{html+='<span style="'+chipStyle+'">'+esc(n)+'</span>';}); html+='</div>'; }
+      else html+='<div style="font-size:12px;color:var(--text3);">—</div>';
       html += '</div>';
     };
     showSection('🏢 Office', data.office, 'var(--accent2)', 'background:rgba(0,119,255,0.1);border:1px solid rgba(0,119,255,0.25);color:#60a5fa;border-radius:20px;padding:3px 10px;font-size:12px;');
@@ -2124,7 +2076,6 @@
     feed.innerHTML = html;
   }
 
-  // ── CONFIRM DRIVER ──
   window.hDeleteEntry = async function(dateStr, entryIdx) {
     if (!confirm('حذف هذا المشروع من الحركة؟')) return;
     try {
@@ -2134,10 +2085,8 @@
       const d = snap.data();
       const entries = [...(d.entries || [])];
       entries.splice(entryIdx, 1);
-      // Also remove confirmation for this entry
       const confirmations = {...(d.confirmations || {})};
       delete confirmations[entryIdx];
-      // Re-index confirmations
       const newConf = {};
       Object.keys(confirmations).forEach(k => {
         const ki = parseInt(k);
@@ -2162,11 +2111,28 @@
       confirmations[entryIdx] = { by: name.trim(), time: now };
       await updateDoc(docRef, { confirmations });
       toast('✅ تم تسجيل التنسيق', 'success');
-    } catch(err) { toast('Error: ' + err.message, 'error'); }
+    } catch(err) { toast('Error: '+err.message,'error'); }
   };
 
+  function initFirebase() {
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      document.getElementById('liveStatus').textContent = 'Live';
+      document.getElementById('configBanner').style.display = 'none';
+      startListener();
+      startRegistryListener();
+      hInitDate();
+      const hDateInp = document.getElementById('h_date');
+      if (hDateInp) hLoadDay(hDateInp.value || getTodayStr());
+    } catch (e) {
+      document.getElementById('liveStatus').textContent = 'Not Connected';
+      document.getElementById('liveStatus').style.color = 'var(--danger)';
+      showEmptyState();
+      console.warn('Firebase not configured:', e);
+    }
+  }
   initFirebase();
-  // haraka init in startRegistryListener
 
   // ── AUTO CLEANUP at midnight ──
   async function cleanupPastDays() {
