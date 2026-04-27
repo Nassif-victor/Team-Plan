@@ -2020,9 +2020,12 @@
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
 
+  let hUnsubscribe = null;
   function hLoadDay(dateStr) {
-    if (!db) return;
-    onSnapshot(doc(db,'haraka',dateStr), snap => {
+    if (!db || !dateStr) return;
+    // Cancel previous listener
+    if (hUnsubscribe) { hUnsubscribe(); hUnsubscribe = null; }
+    hUnsubscribe = onSnapshot(doc(db,'haraka',dateStr), snap => {
       hRenderFeed(snap.exists()?snap.data():null, dateStr);
     });
   }
