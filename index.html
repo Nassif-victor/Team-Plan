@@ -767,9 +767,9 @@
   .haraka-feed { display:flex; flex-direction:column; gap:0; margin-top:20px; }
   .haraka-entry { direction:rtl; text-align:right; background:var(--card); border:1px solid var(--border); border-right:3px solid var(--success); padding:18px 20px; }
   .haraka-entry.needs-confirm { border-right-color:var(--danger)!important; box-shadow:0 0 0 2px rgba(255,68,85,0.25); }
-  .haraka-project-name { font-size:16px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex-direction:row-reverse; }
+  .haraka-project-name { font-size:16px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; direction:rtl; }
   .haraka-project-num { font-family:var(--mono); font-size:12px; color:var(--accent); background:rgba(0,194,255,0.1); border:1px solid rgba(0,194,255,0.2); border-radius:4px; padding:1px 8px; }
-  .haraka-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2); padding:3px 0; flex-wrap:wrap; flex-direction:row-reverse; }
+  .haraka-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2); padding:6px 0; flex-wrap:wrap; direction:rtl; }
   .haraka-person { display:inline-flex; align-items:center; gap:5px; background:rgba(0,229,160,0.08); border:1px solid rgba(0,229,160,0.2); color:var(--success); border-radius:20px; padding:3px 10px; font-size:12px; margin:2px; }
   .haraka-person.engineer { background:rgba(0,119,255,0.1); border-color:rgba(0,119,255,0.25); color:#60a5fa; }
   .haraka-tasks { margin-top:8px; display:flex; flex-direction:column; gap:4px; direction:rtl; }
@@ -1991,10 +1991,26 @@
       toast('مفيش حاجة تتحفظ', 'error'); return;
     }
     try {
-      await setDoc(doc(db,'haraka',dateVal), {
+      // Get existing data to merge entries
+      const docRef = doc(db,'haraka',dateVal);
+      const snap = await getDoc(docRef);
+      const existing = snap.exists() ? snap.data() : {};
+      const existingEntries = existing.entries || [];
+      const existingConf = existing.confirmations || {};
+
+      // Merge: add new entries after existing ones
+      const mergedEntries = [...existingEntries, ...h_pending];
+
+      // Use existing office/vacation/sick if we didn't add new ones
+      const newOffice   = h_lists.office.length   ? [...h_lists.office]   : (existing.office   || []);
+      const newVacation = h_lists.vacation.length ? [...h_lists.vacation] : (existing.vacation || []);
+      const newSick     = h_lists.sick.length     ? [...h_lists.sick]     : (existing.sick     || []);
+
+      await setDoc(docRef, {
         date:dateVal, publishedAt:Date.now(),
-        entries:[...h_pending],
-        office:[...h_lists.office], vacation:[...h_lists.vacation], sick:[...h_lists.sick],
+        entries: mergedEntries,
+        confirmations: existingConf,
+        office: newOffice, vacation: newVacation, sick: newSick,
       });
       h_pending=[]; h_lists.office=[]; h_lists.vacation=[]; h_lists.sick=[];
       hRenderPending();
