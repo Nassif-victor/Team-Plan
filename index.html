@@ -123,12 +123,19 @@
     z-index: 10;
     background: rgba(10,12,16,0.95);
     border-bottom: 1px solid var(--border);
-    padding: 0 32px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 64px;
+    height: 56px;
     backdrop-filter: blur(12px);
+    overflow: hidden;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .logo {
@@ -155,11 +162,7 @@
     letter-spacing: -0.3px;
   }
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
+
 
   .live-dot {
     display: flex;
@@ -190,11 +193,17 @@
     z-index: 10;
     background: rgba(10,12,16,0.9);
     border-bottom: 1px solid var(--border);
-    padding: 0 32px;
+    padding: 0 16px;
     display: flex;
     gap: 0;
     backdrop-filter: blur(8px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    white-space: nowrap;
+    flex-wrap: nowrap;
   }
+  .tabs-bar::-webkit-scrollbar { display: none; }
 
   .tab-btn {
     background: none;
@@ -203,16 +212,17 @@
     font-family: var(--font);
     font-size: 13px;
     font-weight: 500;
-    padding: 14px 24px;
+    padding: 14px 16px;
     cursor: pointer;
     border-bottom: 2px solid transparent;
     transition: all 0.2s;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     position: relative;
     top: 1px;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .tab-btn:hover { color: var(--text2); }
@@ -904,7 +914,7 @@
     </div>
     <div class="live-dot" id="liveStatus">Connecting...</div>
       <span id="user_name_display" style="font-size:12px;color:var(--text2);font-family:var(--mono);"></span>
-      <button onclick="logout()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">خروج</button>
+      <button onclick="logout()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;">خروج</button>
   </div>
 </header>
 
