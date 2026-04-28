@@ -794,6 +794,35 @@
   .confirm-btn { display:inline-flex; align-items:center; gap:6px; background:transparent; border:1px solid rgba(0,229,160,0.4); color:var(--success); border-radius:8px; padding:6px 14px; font-size:12px; cursor:pointer; font-family:var(--font); transition:all 0.2s; margin-top:10px; }
   .confirm-btn:hover { background:rgba(0,229,160,0.1); }
   .confirm-name { font-size:12px; color:var(--success); font-family:var(--mono); margin-top:8px; padding:6px 10px; background:rgba(0,229,160,0.08); border-radius:6px; border:1px solid rgba(0,229,160,0.2); }
+
+  /* ── TOOLS TAB ── */
+  .tools-feed { display:flex; flex-direction:column; gap:12px; margin-top:20px; }
+  .tool-card {
+    background:var(--card); border:1px solid var(--border);
+    border-right:3px solid var(--warn); border-radius:12px;
+    padding:18px 20px; direction:rtl;
+  }
+  .tool-card.lost { border-right-color:var(--danger); }
+  .tool-card.maintenance { border-right-color:var(--accent2); }
+  .tool-status-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    border-radius:20px; padding:3px 12px; font-size:12px; font-weight:600;
+  }
+  .badge-lost { background:rgba(255,68,85,0.1); color:var(--danger); border:1px solid rgba(255,68,85,0.3); }
+  .badge-maintenance { background:rgba(0,119,255,0.1); color:var(--accent2); border:1px solid rgba(0,119,255,0.3); }
+  .badge-ok { background:rgba(0,229,160,0.1); color:var(--success); border:1px solid rgba(0,229,160,0.3); }
+
+  /* ── SETTINGS TAB ── */
+  .settings-section { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:20px; }
+  .settings-title { font-size:14px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .tech-chip-list { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+  .tech-chip {
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--bg3); border:1px solid var(--border2);
+    border-radius:20px; padding:5px 12px; font-size:13px;
+  }
+  .tech-chip button { background:none; border:none; color:var(--text3); cursor:pointer; font-size:14px; line-height:1; }
+  .tech-chip button:hover { color:var(--danger); }
 </style>
 </head>
 <body>
@@ -831,6 +860,12 @@
   </button>
   <button class="tab-btn" onclick="switchTab('haraka')" id="tab-haraka">
     <span class="tab-icon">🚀</span> الحركة
+  </button>
+  <button class="tab-btn" onclick="switchTab('tools')" id="tab-tools">
+    <span class="tab-icon">🔧</span> عدة تالفة
+  </button>
+  <button class="tab-btn" onclick="switchTab('settings')" id="tab-settings">
+    <span class="tab-icon">⚙️</span> Settings
   </button>
 </div>
 
@@ -1194,6 +1229,64 @@
 
     <button class="btn-save-h" onclick="hPublish()">💾 Save الحركة</button>
     <div id="h_feed" style="margin-top:24px;"></div>
+  </div>
+
+
+  <!-- ─── TOOLS TAB ─── -->
+  <div class="tab-panel" id="panel-tools" style="direction:rtl;">
+    <div class="section-title">🔧 عدة تالفة</div>
+
+    <!-- Add form -->
+    <div class="h-builder">
+      <div class="h-section-label">إضافة عدة</div>
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="field">
+          <label>👤 اسم الموظف</label>
+          <input type="text" id="t_employee" placeholder="اسمك">
+        </div>
+        <div class="field">
+          <label>🔧 اسم العدة</label>
+          <input type="text" id="t_tool" placeholder="اسم العدة">
+        </div>
+        <div class="field">
+          <label>📋 الحالة</label>
+          <select id="t_status">
+            <option value="maintenance">🔨 اتسلمت للصيانة</option>
+            <option value="lost">❌ مفقودة</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>📝 ملاحظات</label>
+          <input type="text" id="t_notes" placeholder="تفاصيل إضافية">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="tAddTool()">+ إضافة</button>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <button onclick="tFilter('all')" id="tBtn_all" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">الكل</button>
+      <button onclick="tFilter('maintenance')" id="tBtn_maintenance" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">🔨 صيانة</button>
+      <button onclick="tFilter('lost')" id="tBtn_lost" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">❌ مفقودة</button>
+    </div>
+
+    <div id="tools_feed" class="tools-feed"></div>
+  </div>
+
+  <!-- ─── SETTINGS TAB ─── -->
+  <div class="tab-panel" id="panel-settings" style="direction:rtl;">
+    <div class="section-title">⚙️ Settings</div>
+
+    <div class="settings-section">
+      <div class="settings-title">👷 أسماء الفنيين</div>
+      <div class="tech-chip-list" id="techsList"></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="newTechName" placeholder="اسم الفني" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;flex:1;direction:rtl;">
+        <button onclick="addTech()" class="btn btn-primary" style="padding:9px 18px;">+ إضافة</button>
+      </div>
+    </div>
   </div>
 
 
@@ -2021,6 +2114,122 @@
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
 
+
+  // ══════════════════════════════════════
+  // TOOLS JS
+  // ══════════════════════════════════════
+  let toolsFilter = 'all';
+
+  window.tAddTool = async function() {
+    const employee = document.getElementById('t_employee').value.trim();
+    const tool     = document.getElementById('t_tool').value.trim();
+    const status   = document.getElementById('t_status').value;
+    const notes    = document.getElementById('t_notes').value.trim();
+    if (!employee || !tool) { toast('اكتب اسمك واسم العدة', 'error'); return; }
+    try {
+      await addDoc(collection(db, 'tools'), {
+        employee, tool, status, notes,
+        createdAt: Date.now(),
+        resolved: false,
+      });
+      ['t_employee','t_tool','t_notes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('t_status').selectedIndex = 0;
+      toast('✅ تمت الإضافة', 'success');
+    } catch(e) { toast('Error: '+e.message, 'error'); }
+  };
+
+  window.tFilter = function(f) {
+    toolsFilter = f;
+    ['all','maintenance','lost'].forEach(k => {
+      document.getElementById('tBtn_'+k).className = 'btn ' + (k===f ? 'btn-primary' : 'btn-ghost');
+    });
+    tRenderTools();
+  };
+
+  let toolsList = [];
+
+  function tStartListener() {
+    const q = query(collection(db,'tools'), orderBy('createdAt','desc'));
+    onSnapshot(q, snap => {
+      toolsList = [];
+      snap.forEach(d => toolsList.push({id:d.id,...d.data()}));
+      tRenderTools();
+    });
+  }
+
+  function tRenderTools() {
+    const feed = document.getElementById('tools_feed');
+    if (!feed) return;
+    const filtered = toolsFilter === 'all' ? toolsList : toolsList.filter(t => t.status === toolsFilter);
+    if (!filtered.length) {
+      feed.innerHTML = '<div class="empty-state"><div class="empty-icon">🔧</div><p>مفيش عدة مسجلة</p></div>';
+      return;
+    }
+    const statusLabel = { maintenance:'🔨 اتسلمت للصيانة', lost:'❌ مفقودة' };
+    const statusClass = { maintenance:'badge-maintenance', lost:'badge-lost' };
+    feed.innerHTML = filtered.map(t => `
+      <div class="tool-card ${t.status}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <button onclick="tResolve('${t.id}')" style="background:transparent;border:1px solid rgba(0,229,160,0.4);color:var(--success);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">✅ تم الحل</button>
+          <span class="tool-status-badge ${statusClass[t.status]}">${statusLabel[t.status]||t.status}</span>
+        </div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px;">🔧 ${esc(t.tool)}</div>
+        <div style="font-size:13px;color:var(--text2);">👤 ${esc(t.employee)}</div>
+        ${t.notes ? `<div style="font-size:12px;color:var(--text3);margin-top:4px;">📝 ${esc(t.notes)}</div>` : ''}
+        <div style="font-size:11px;color:var(--text3);margin-top:6px;font-family:var(--mono);">${new Date(t.createdAt).toLocaleDateString('ar-EG')}</div>
+      </div>
+    `).join('');
+  }
+
+  window.tResolve = async function(id) {
+    if (!confirm('تم حل المشكلة؟')) return;
+    try {
+      await deleteDoc(doc(db,'tools',id));
+      toast('✅ تم الحذف', 'success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  // ══════════════════════════════════════
+  // SETTINGS JS
+  // ══════════════════════════════════════
+  let techsData = [];
+
+  function settingsStartListener() {
+    onSnapshot(doc(db,'settings','techs'), snap => {
+      techsData = snap.exists() ? (snap.data().list || []) : [];
+      renderTechs();
+    });
+  }
+
+  function renderTechs() {
+    const el = document.getElementById('techsList');
+    if (!el) return;
+    el.innerHTML = techsData.map((t,i) => `
+      <div class="tech-chip">
+        <span>👷 ${esc(t)}</span>
+        <button onclick="removeTech(${i})">×</button>
+      </div>
+    `).join('');
+  }
+
+  window.addTech = async function() {
+    const name = document.getElementById('newTechName').value.trim();
+    if (!name) return;
+    techsData.push(name);
+    document.getElementById('newTechName').value = '';
+    await setDoc(doc(db,'settings','techs'), { list: techsData });
+    toast('✅ تمت الإضافة', 'success');
+  };
+
+  window.removeTech = async function(i) {
+    techsData.splice(i,1);
+    await setDoc(doc(db,'settings','techs'), { list: techsData });
+    toast('تم الحذف', 'success');
+  };
+
+  // ══════════════════════════════════════
+  // CONFIRM ENGINEER in Haraka
+  // ══════════════════════════════════════
   window.hSearch = function() { const v = document.getElementById('h_date').value; if(v) hLoadDay(v); else toast('اختار تاريخ أول','error'); };
 
   let hUnsubscribe = null;
@@ -2146,6 +2355,22 @@
     } catch(err) { toast('Error: '+err.message,'error'); }
   };
 
+  window.hConfirmEngineer = async function(dateStr, entryIdx) {
+    const name = prompt('اسمك؟');
+    if (!name || !name.trim()) return;
+    const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    try {
+      const docRef = doc(db, 'haraka', dateStr);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) return;
+      const d = snap.data();
+      const confirmations = d.confirmations || {};
+      confirmations['eng_'+entryIdx] = { by: name.trim(), time: now };
+      await updateDoc(docRef, { confirmations });
+      toast('✅ تم تسجيل التنسيق مع المهندس', 'success');
+    } catch(err) { toast('Error: '+err.message,'error'); }
+  };
+
   window.hConfirmDriver = async function(dateStr, entryIdx) {
     const name = prompt('اسمك؟');
     if (!name || !name.trim()) return;
@@ -2171,6 +2396,8 @@
       startListener();
       startRegistryListener();
       hInitDate();
+      tStartListener();
+      settingsStartListener();
       const hDateInp = document.getElementById('h_date');
       if (hDateInp) hLoadDay(hDateInp.value || getTodayStr());
     } catch (e) {
