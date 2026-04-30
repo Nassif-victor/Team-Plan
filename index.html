@@ -935,6 +935,9 @@
   <button class="tab-btn" onclick="switchTab('inventory')" id="tab-inventory">
     <span class="tab-icon">📦</span> العدة
   </button>
+  <button class="tab-btn" onclick="switchTab('tasks')" id="tab-tasks">
+    <span class="tab-icon">✅</span> Task Assignment
+  </button>
   <button class="tab-btn" onclick="switchTab('tools')" id="tab-tools">
     <span class="tab-icon">🔧</span> عدة تالفة
   </button>
@@ -1247,14 +1250,39 @@
       </div>
       <div class="field" style="margin-bottom:12px;">
         <label>👨🏻‍💻 Engineers</label>
-        <div class="h-tags-box" id="h_eng_wrap" onclick="document.getElementById('h_eng_input').focus()">
-          <input class="h-bare-input" id="h_eng_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'eng')">
+        <select id="h_eng_select" onchange="hAddFromSelect('eng')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;width:100%;direction:rtl;">
+          <option value="">— اختار مهندس —</option>
+          <option value="عبد الرحمن فتحي">عبد الرحمن فتحي</option>
+          <option value="فادي فرج">فادي فرج</option>
+          <option value="بيتر أمجد">بيتر أمجد</option>
+          <option value="أحمد عاطف">أحمد عاطف</option>
+        </select>
+        <div class="h-tags-box" id="h_eng_wrap" style="margin-top:6px;min-height:32px;">
+          <input class="h-bare-input" id="h_eng_input" style="display:none;" onkeydown="hTagKey(event,'eng')">
         </div>
       </div>
       <div class="field" style="margin-bottom:12px;">
         <label>👷🏻‍♂️ Technicians</label>
-        <div class="h-tags-box" id="h_tech_wrap" onclick="document.getElementById('h_tech_input').focus()">
-          <input class="h-bare-input" id="h_tech_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'tech')">
+        <select id="h_tech_select" onchange="hAddFromSelect('tech')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;width:100%;direction:rtl;">
+          <option value="">— اختار فني —</option>
+          <option value="رمزي قدري">رمزي قدري</option>
+          <option value="صمويل نجاح">صمويل نجاح</option>
+          <option value="محسن يوسف">محسن يوسف</option>
+          <option value="مصطفى محمد">مصطفى محمد</option>
+          <option value="محمد سيد">محمد سيد</option>
+          <option value="مينا عادل">مينا عادل</option>
+          <option value="مينا صبري">مينا صبري</option>
+          <option value="حسام صلاح">حسام صلاح</option>
+          <option value="محمود فرغلي">محمود فرغلي</option>
+          <option value="مكاريوس إسحق">مكاريوس إسحق</option>
+          <option value="كيرلس ياسر">كيرلس ياسر</option>
+          <option value="أيمن سيد">أيمن سيد</option>
+          <option value="كيرلس ابراهيم">كيرلس ابراهيم</option>
+          <option value="محمد رمضان">محمد رمضان</option>
+          <option value="بيشوي عدلي">بيشوي عدلي</option>
+        </select>
+        <div class="h-tags-box" id="h_tech_wrap" style="margin-top:6px;min-height:32px;">
+          <input class="h-bare-input" id="h_tech_input" style="display:none;" onkeydown="hTagKey(event,'tech')">
         </div>
       </div>
       <div class="field" style="margin-bottom:12px;">
@@ -1305,6 +1333,14 @@
     </div>
 
     <button class="btn-save-h" onclick="hPublish()">💾 Save الحركة</button>
+
+    <!-- ذيع button - role 1&2 only, controls feed visibility for role 4&5 -->
+    <div id="h_broadcast_wrap" style="margin-top:12px;display:none;">
+      <button onclick="hBroadcast()" id="h_broadcast_btn" class="btn-save-h" style="background:linear-gradient(135deg,#ff6b35,#ff4455);">
+        📢 ذيع الحركة
+      </button>
+    </div>
+
     <div id="h_feed" style="margin-top:24px;"></div>
   </div>
 
@@ -1448,6 +1484,59 @@
       </div>
       <button onclick="invCloseScan()" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:12px;">✕ إغلاق</button>
     </div>
+  </div>
+
+
+  <!-- ─── TASK ASSIGNMENT TAB ─── -->
+  <div class="tab-panel" id="panel-tasks">
+    <div class="section-title">✅ Task Assignment</div>
+
+    <!-- Assign form - role 1 only -->
+    <div class="h-builder" id="task_assign_form">
+      <div class="h-section-label">Assign New Task</div>
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="field">
+          <label>Assign To</label>
+          <select id="task_assignee" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;">
+            <option value="">— Select Person —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Task Title</label>
+          <input type="text" id="task_title" placeholder="Task title...">
+        </div>
+        <div class="field">
+          <label>Priority</label>
+          <select id="task_priority" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;">
+            <option value="normal">🟡 Normal</option>
+            <option value="high">🔴 High</option>
+            <option value="low">🟢 Low</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Due Date</label>
+          <input type="date" id="task_due">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label>Description</label>
+          <input type="text" id="task_desc" placeholder="Task description...">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="taskAssign()">+ Assign Task</button>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <button onclick="taskFilter('all')" id="taskBtn_all" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">All</button>
+      <button onclick="taskFilter('running')" id="taskBtn_running" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">🔵 Running</button>
+      <button onclick="taskFilter('hold')" id="taskBtn_hold" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">🟡 On Hold</button>
+      <button onclick="taskFilter('done')" id="taskBtn_done" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">✅ Done</button>
+      <button onclick="taskFilter('cancelled')" id="taskBtn_cancelled" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">❌ Cancelled</button>
+    </div>
+
+    <div id="tasks_feed"></div>
   </div>
 
 
@@ -1959,6 +2048,12 @@
     if (name === 'projects') {
       renderProjectsTable();
     }
+    if (name === 'tasks') {
+      taskPopulateAssignee();
+      // Show assign form for admin only
+      const assignForm = document.getElementById('task_assign_form');
+      if (assignForm) assignForm.style.display = currentUser && currentUser.roles.some(r=>[1,2].includes(r)) ? '' : 'none';
+    }
     if (name === 'inventory') {
       const adminSec = document.getElementById('inv_admin_section');
       if (adminSec) adminSec.style.display = window._isAdminish ? '' : 'none';
@@ -2341,8 +2436,8 @@
 
   // Tab permissions per role
   const ROLE_TABS = {
-    1: ['projects','add','view','haraka','tools','inventory','settings'],
-    2: ['projects','add','view','haraka','tools','inventory'],
+    1: ['projects','add','view','haraka','tasks','tools','inventory','settings'],
+    2: ['projects','add','view','haraka','tasks','tools','inventory'],
     3: ['projects','add','view','haraka'],
     4: ['tools','haraka','inventory'],
     5: ['inventory'],
@@ -2389,6 +2484,10 @@
     window._canApproveInv     = canApproveInv;
     window._isRole1           = isRole1;
     window._isAdminish        = isAdminish;
+
+    // Show/hide ذيع button (role 1&2 only)
+    const broadcastWrap = document.getElementById('h_broadcast_wrap');
+    if (broadcastWrap) broadcastWrap.style.display = isAdminish ? '' : 'none';
 
     // Switch to first allowed tab
     const firstTab = allowedTabs[0] || 'haraka';
@@ -2837,6 +2936,194 @@
     `).join('');
   };
 
+
+  // ══════════════════════════════════════
+  // TASK ASSIGNMENT JS
+  // ══════════════════════════════════════
+  let tasksList = [];
+  let tasksFilterVal = 'all';
+
+  const ALL_USERS_FOR_TASKS = [
+    { email:'n.victor@nassifteam.com',   name:'نصيف فيكتور' },
+    { email:'m.emad@nassifteam.com',     name:'مايكل عماد' },
+    { email:'r.kadry@nassifteam.com',    name:'رمزي قدري' },
+    { email:'a.fathy@nassifteam.com',    name:'عبد الرحمن فتحي' },
+    { email:'b.adly@nassifteam.com',     name:'بيشوي عدلي' },
+    { email:'f.farag@nassifteam.com',    name:'فادي فرج' },
+    { email:'p.amgad@nassifteam.com',    name:'بيتر أمجد' },
+    { email:'a.atef@nassifteam.com',     name:'أحمد عاطف' },
+    { email:'s.nagah@nassifteam.com',    name:'صمويل نجاح' },
+    { email:'m.youssef@nassifteam.com',  name:'محسن يوسف' },
+    { email:'m.mohamed@nassifteam.com',  name:'مصطفى محمد' },
+    { email:'m.sayed@nassifteam.com',    name:'محمد سيد' },
+    { email:'m.adel@nassifteam.com',     name:'مينا عادل' },
+    { email:'m.sabry@nassifteam.com',    name:'مينا صبري' },
+    { email:'h.salah@nassifteam.com',    name:'حسام صلاح' },
+    { email:'m.farghaly@nassifteam.com', name:'محمود فرغلي' },
+    { email:'m.isaac@nassifteam.com',    name:'مكاريوس إسحق' },
+    { email:'k.yasser@nassifteam.com',   name:'كيرلس ياسر' },
+    { email:'a.sayed@nassifteam.com',    name:'أيمن سيد' },
+    { email:'k.ibrahim@nassifteam.com',  name:'كيرلس ابراهيم' },
+    { email:'m.ramadan@nassifteam.com',  name:'محمد رمضان' },
+  ];
+
+  function taskPopulateAssignee() {
+    const sel = document.getElementById('task_assignee');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Select Person —</option>' +
+      ALL_USERS_FOR_TASKS.map(u => `<option value="${u.email}">${u.name}</option>`).join('');
+  }
+
+  function tasksStartListener() {
+    onSnapshot(query(collection(db,'tasks'), orderBy('createdAt','desc')), snap => {
+      tasksList = [];
+      snap.forEach(d => tasksList.push({id:d.id,...d.data()}));
+      taskRenderFeed();
+    });
+  }
+
+  window.taskAssign = async function() {
+    const assigneeEmail = document.getElementById('task_assignee').value;
+    const title    = document.getElementById('task_title').value.trim();
+    const priority = document.getElementById('task_priority').value;
+    const due      = document.getElementById('task_due').value;
+    const desc     = document.getElementById('task_desc').value.trim();
+    if (!assigneeEmail || !title) { toast('اختار الشخص واكتب التاسك', 'error'); return; }
+    const assignee = ALL_USERS_FOR_TASKS.find(u=>u.email===assigneeEmail);
+    try {
+      await addDoc(collection(db,'tasks'), {
+        assigneeEmail, assigneeName: assignee?.name || assigneeEmail,
+        title, priority, due, desc,
+        status: 'running',
+        assignedBy: currentUser.name,
+        assignedByEmail: currentUser.email,
+        createdAt: Date.now(),
+        feedback: [],
+      });
+      ['task_title','task_desc','task_due'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('task_assignee').value='';
+      document.getElementById('task_priority').selectedIndex=0;
+      toast('✅ Task assigned!', 'success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  window.taskFilter = function(f) {
+    tasksFilterVal = f;
+    ['all','running','hold','done','cancelled'].forEach(k=>{
+      const btn = document.getElementById('taskBtn_'+k);
+      if(btn) btn.className='btn '+(k===f?'btn-primary':'btn-ghost');
+    });
+    taskRenderFeed();
+  };
+
+  window.taskUpdateStatus = async function(id, status) {
+    await updateDoc(doc(db,'tasks',id), { status });
+    toast('✅ Status updated','success');
+  };
+
+  window.taskSendFeedback = async function(id) {
+    const inp = document.getElementById('feedback_'+id);
+    if (!inp || !inp.value.trim()) return;
+    const text = inp.value.trim();
+    try {
+      const snap = await getDoc(doc(db,'tasks',id));
+      if (!snap.exists()) return;
+      const feedback = snap.data().feedback || [];
+      feedback.push({ by: currentUser.name, text, time: new Date().toLocaleString('ar-EG') });
+      await updateDoc(doc(db,'tasks',id), { feedback });
+      inp.value = '';
+      toast('✅ Feedback sent','success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  window.taskDelete = async function(id) {
+    if (!confirm('Delete this task?')) return;
+    await deleteDoc(doc(db,'tasks',id));
+    toast('🗑 Deleted','success');
+  };
+
+  function taskRenderFeed() {
+    const feed = document.getElementById('tasks_feed');
+    if (!feed) return;
+    const isAdmin = currentUser && currentUser.roles.some(r=>[1,2].includes(r));
+    // Filter: admin sees all, others see only their own
+    let list = isAdmin ? tasksList : tasksList.filter(t=>t.assigneeEmail===currentUser?.email);
+    if (tasksFilterVal !== 'all') list = list.filter(t=>t.status===tasksFilterVal);
+
+    if (!list.length) {
+      feed.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div><p>No tasks found</p></div>';
+      return;
+    }
+
+    const priorityColors = { high:'var(--danger)', normal:'var(--warn)', low:'var(--success)' };
+    const statusColors   = { running:'var(--accent2)', hold:'var(--warn)', done:'var(--success)', cancelled:'var(--text3)' };
+    const statusLabel    = { running:'🔵 Running', hold:'🟡 On Hold', done:'✅ Done', cancelled:'❌ Cancelled' };
+    const priorityLabel  = { high:'🔴 High', normal:'🟡 Normal', low:'🟢 Low' };
+
+    feed.innerHTML = list.map(t => `
+      <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${statusColors[t.status]||'var(--border)'};border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:12px;background:rgba(0,0,0,0.2);border-radius:4px;padding:2px 8px;color:${priorityColors[t.priority]||'var(--text2)'};">${priorityLabel[t.priority]||t.priority}</span>
+            <span style="font-size:12px;color:var(--text3);">${t.due ? '📅 '+t.due : ''}</span>
+          </div>
+          <span style="font-size:12px;font-weight:600;color:${statusColors[t.status]};">${statusLabel[t.status]||t.status}</span>
+        </div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px;">${esc(t.title)}</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:4px;">👤 ${esc(t.assigneeName)}</div>
+        ${t.desc ? `<div style="font-size:13px;color:var(--text3);margin-bottom:8px;">📝 ${esc(t.desc)}</div>` : ''}
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">Assigned by ${esc(t.assignedBy)} — ${new Date(t.createdAt).toLocaleDateString('ar-EG')}</div>
+
+        <!-- Status update - assignee or admin -->
+        ${(isAdmin || t.assigneeEmail===currentUser?.email) ? `
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+          ${['running','hold','done','cancelled'].map(s=>
+            `<button onclick="taskUpdateStatus('${t.id}','${s}')" style="background:${t.status===s?'rgba(0,194,255,0.15)':'transparent'};border:1px solid ${t.status===s?'var(--accent)':'var(--border2)'};color:${t.status===s?'var(--accent)':'var(--text3)'};border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">${statusLabel[s]}</button>`
+          ).join('')}
+          ${isAdmin ? `<button onclick="taskDelete('${t.id}')" style="background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;margin-right:auto;">🗑</button>` : ''}
+        </div>` : ''}
+
+        <!-- Feedback -->
+        ${(t.feedback||[]).length ? `
+        <div style="border-top:1px solid var(--border);padding-top:8px;margin-bottom:8px;">
+          ${(t.feedback||[]).map(f=>`<div style="font-size:12px;color:var(--text2);margin-bottom:4px;">💬 <strong>${esc(f.by)}:</strong> ${esc(f.text)} <span style="color:var(--text3);font-size:11px;">${f.time}</span></div>`).join('')}
+        </div>` : ''}
+
+        <!-- Send feedback -->
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="feedback_${t.id}" placeholder="Add feedback / note..." 
+            style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 12px;color:var(--text);font-size:13px;outline:none;"
+            onkeydown="if(event.key==='Enter') taskSendFeedback('${t.id}')">
+          <button onclick="taskSendFeedback('${t.id}')" style="background:var(--accent2);border:none;color:#fff;border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;">Send</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.hAddFromSelect = function(type) {
+    const selIds = { eng:'h_eng_select', tech:'h_tech_select' };
+    const sel = document.getElementById(selIds[type]);
+    if (!sel || !sel.value) return;
+    const val = sel.value;
+    if (h_lists[type].includes(val)) { sel.value=''; return; }
+    h_lists[type].push(val);
+    sel.value = '';
+    hRenderTags(type);
+  };
+
+  window.hBroadcast = async function() {
+    const dateVal = document.getElementById('h_date').value;
+    if (!dateVal) { toast('اختار التاريخ أول','error'); return; }
+    try {
+      const docRef = doc(db,'haraka',dateVal);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) { toast('مفيش حركة محفوظة لهذا اليوم','error'); return; }
+      const isBroadcast = snap.data().broadcasted;
+      await updateDoc(docRef, { broadcasted: !isBroadcast });
+      toast(!isBroadcast ? '📢 تم الذيع!' : '🔇 تم إيقاف الذيع', 'success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
   window.hSearch = function() { const v = document.getElementById('h_date').value; if(v) hLoadDay(v); else toast('اختار تاريخ أول','error'); };
 
   let hUnsubscribe = null;
@@ -2859,7 +3146,24 @@
   function hRenderFeed(data, dateStr) {
     const feed = document.getElementById('h_feed');
     if (!feed) return;
-    if (!data) { feed.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>مفيش حركة لهذا اليوم</p></div>'; return; }
+    // Update broadcast button state
+    const broadcastBtn = document.getElementById('h_broadcast_btn');
+    if (broadcastBtn && data) {
+      broadcastBtn.textContent = data.broadcasted ? '🔇 إيقاف الذيع' : '📢 ذيع الحركة';
+      broadcastBtn.style.background = data.broadcasted
+        ? 'linear-gradient(135deg,#4a5568,#2d3748)'
+        : 'linear-gradient(135deg,#ff6b35,#ff4455)';
+    }
+    // Role 4&5: only show if broadcasted
+    const isLimitedRole = currentUser && currentUser.roles.every(r => [4,5].includes(r));
+    if (!data) {
+      feed.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>مفيش حركة لهذا اليوم</p></div>';
+      return;
+    }
+    if (isLimitedRole && !data.broadcasted) {
+      feed.innerHTML='<div class="empty-state"><div class="empty-icon">⏳</div><p>الحركة لسه مش متاحة</p></div>';
+      return;
+    }
     const confirmData = data.confirmations || {};
     let html = '<div class="haraka-date-banner">'+hFmtDateAr(data.date)+'</div><div class="haraka-feed">';
 
@@ -3037,6 +3341,7 @@
       tStartListener();
       settingsStartListener();
       invStartListeners();
+      tasksStartListener();
       invCheckQRParam();
       if (!checkStoredLogin()) { document.getElementById('login_screen').style.display='flex'; document.getElementById('main_app').style.display='none'; }
       const hDateInp = document.getElementById('h_date');
