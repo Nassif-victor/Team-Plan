@@ -1252,15 +1252,18 @@
         <div class="field"><label>Project Number</label>
           <input type="text" id="h_number" placeholder="A2XXX" oninput="hAutoFillByNumber()"></div>
         <div class="field"><label>🚘 Transportation</label>
-          <select id="h_car">
+          <select id="h_car" onchange="hCarChanged()">
             <option value="مواصلات">🚌 مواصلات</option>
             <option value="Sedan">🚗 Sedan</option>
             <option value="Van">🚐 Van</option>
             <option value="ايجار">🚕 إيجار</option>
             <option value="شركة/إيجار">🏢 شركة/إيجار</option>
           </select></div>
-        <div class="field"><label>Car Detail</label>
-          <input type="text" id="h_car_detail" placeholder="اسم السواق / اللوحة"></div>
+        <div class="field" id="h_driver_field"><label>🚗 السواق</label>
+          <select id="h_car_detail" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;direction:rtl;" onchange="hSelectDriver()">
+            <option value="">— اختار سواق —</option>
+          </select>
+        </div>
       </div>
       <div class="field" style="margin-bottom:12px;">
         <label>👨🏻‍💻 Engineers</label>
@@ -1296,6 +1299,8 @@
           <option value="محمد رمضان">محمد رمضان</option>
           <option value="بيشوي عدلي">بيشوي عدلي</option>
           <option value="مينا سامي">مينا سامي</option>
+          <option value="ايهاب حشمت">ايهاب حشمت</option>
+          <option value="نادر فايز">نادر فايز</option>
         </select>
         <div class="h-tags-box" id="h_tech_wrap" style="margin-top:6px;min-height:32px;">
           <input class="h-bare-input" id="h_tech_input" style="display:none;" onkeydown="hTagKey(event,'tech')">
@@ -1352,6 +1357,8 @@
           <option value="محمد رمضان">محمد رمضان</option>
           <option value="بيشوي عدلي">بيشوي عدلي</option>
           <option value="مينا سامي">مينا سامي</option>
+          <option value="ايهاب حشمت">ايهاب حشمت</option>
+          <option value="نادر فايز">نادر فايز</option>
         </select>
         <div class="h-tags-box" id="h_office_wrap" style="min-height:32px;">
           <input class="h-bare-input" id="h_office_input" style="display:none;" onkeydown="hTagKey(event,'office')">
@@ -1382,6 +1389,8 @@
           <option value="محمد رمضان">محمد رمضان</option>
           <option value="بيشوي عدلي">بيشوي عدلي</option>
           <option value="مينا سامي">مينا سامي</option>
+          <option value="ايهاب حشمت">ايهاب حشمت</option>
+          <option value="نادر فايز">نادر فايز</option>
         </select>
         <div class="h-tags-box" id="h_vacation_wrap" style="min-height:32px;">
           <input class="h-bare-input" id="h_vacation_input" style="display:none;" onkeydown="hTagKey(event,'vacation')">
@@ -1412,6 +1421,8 @@
           <option value="محمد رمضان">محمد رمضان</option>
           <option value="بيشوي عدلي">بيشوي عدلي</option>
           <option value="مينا سامي">مينا سامي</option>
+          <option value="ايهاب حشمت">ايهاب حشمت</option>
+          <option value="نادر فايز">نادر فايز</option>
         </select>
         <div class="h-tags-box" id="h_sick_wrap" style="min-height:32px;">
           <input class="h-bare-input" id="h_sick_input" style="display:none;" onkeydown="hTagKey(event,'sick')">
@@ -1486,6 +1497,24 @@
   <div class="tab-panel" id="panel-settings" style="direction:rtl;">
     <div class="section-title">⚙️ Settings</div>
 
+    <!-- Settings sub-tabs -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px;">
+      <button onclick="settingsSubTab('techs')" id="settingsSubBtn_techs"
+        style="background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-family:var(--font);font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;">
+        👷 الفنيين
+      </button>
+      <button onclick="settingsSubTab('drivers')" id="settingsSubBtn_drivers"
+        style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
+        🚗 السواقين
+      </button>
+      <button onclick="settingsSubTab('users')" id="settingsSubBtn_users"
+        style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
+        👥 المستخدمين
+      </button>
+    </div>
+
+    <!-- SUB TAB: TECHS -->
+    <div id="settings_section_techs">
     <!-- Users table - role 1 only -->
     <div class="settings-section" id="settings_users_section">
       <div class="settings-title">👥 المستخدمين وكلمات المرور</div>
@@ -1512,7 +1541,46 @@
         <button onclick="addTech()" class="btn btn-primary" style="padding:9px 18px;">+ إضافة</button>
       </div>
     </div>
-  </div>
+    </div><!-- /settings_section_techs -->
+
+    <!-- SUB TAB: DRIVERS -->
+    <div id="settings_section_drivers" style="display:none;">
+      <div class="settings-section">
+        <div class="settings-title">🚗 السواقين</div>
+        <div id="drivers_list" style="margin-bottom:16px;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;">
+          <div class="field"><label>اسم السواق</label>
+            <input type="text" id="new_driver_name" placeholder="اسم السواق" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;direction:rtl;width:100%;">
+          </div>
+          <div class="field"><label>رقم التليفون</label>
+            <input type="text" id="new_driver_phone" placeholder="01XXXXXXXXX" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;direction:rtl;width:100%;">
+          </div>
+          <button onclick="addDriver()" class="btn btn-primary" style="padding:10px 18px;">+ إضافة</button>
+        </div>
+      </div>
+    </div><!-- /settings_section_drivers -->
+
+    <!-- SUB TAB: USERS (role 1 only) -->
+    <div id="settings_section_users" style="display:none;">
+      <div class="settings-section" id="settings_users_section2">
+        <div class="settings-title">👥 المستخدمين وكلمات المرور</div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:var(--bg3);">
+                <th style="padding:10px;text-align:right;border-bottom:1px solid var(--border);">الاسم</th>
+                <th style="padding:10px;text-align:right;border-bottom:1px solid var(--border);">Email</th>
+                <th style="padding:10px;text-align:right;border-bottom:1px solid var(--border);">Password</th>
+                <th style="padding:10px;text-align:right;border-bottom:1px solid var(--border);">Roles</th>
+              </tr>
+            </thead>
+            <tbody id="settings_users_tbody2"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /settings_section_users -->
+
+  </div><!-- /panel-settings -->
 
 
   <!-- ─── INVENTORY TAB ─── -->
@@ -1585,6 +1653,20 @@
   <div class="tab-panel" id="panel-tasks">
     <div class="section-title">✅ Task Assignment</div>
 
+    <!-- Tab switcher inside Tasks -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;">
+      <button onclick="taskSubTab('mytasks')" id="taskSubBtn_mytasks"
+        style="background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-family:var(--font);font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;">
+        📋 Tasks
+      </button>
+      <button onclick="taskSubTab('requests')" id="taskSubBtn_requests"
+        style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
+        🔖 Request Approvals
+      </button>
+    </div>
+
+    <!-- SECTION A: Tasks -->
+    <div id="tasks_section_mytasks">
     <!-- Assign form - role 1 only -->
     <div class="h-builder" id="task_assign_form">
       <div class="h-section-label">Assign New Task</div>
@@ -1615,10 +1697,7 @@
           <label>Description</label>
           <input type="text" id="task_desc" placeholder="Task description...">
         </div>
-        <div class="field" style="grid-column:1/-1;" id="task_req_wrap">
-          <label>Request Numbers (optional)</label>
-          <input type="text" id="task_req_nums" placeholder="e.g. REQ-001, REQ-002...">
-        </div>
+
       </div>
       <div class="form-actions">
         <button class="btn btn-primary" onclick="taskAssign()">+ Assign Task</button>
@@ -1635,6 +1714,44 @@
     </div>
 
     <div id="tasks_feed"></div>
+    </div><!-- /tasks_section_mytasks -->
+
+    <!-- SECTION B: Request Approvals -->
+    <div id="tasks_section_requests" style="display:none;">
+
+      <!-- Role 3: Submit form -->
+      <div class="h-builder" id="req_submit_form">
+        <div class="h-section-label">Submit Request for Approval</div>
+        <div class="form-grid" style="margin-bottom:14px;">
+          <div class="field">
+            <label>رقم الـ Request</label>
+            <input type="text" id="req_number" placeholder="مثال: REQ-2026-001">
+          </div>
+          <div class="field">
+            <label>اسم المشروع</label>
+            <input type="text" id="req_project" placeholder="اسم المشروع">
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label>ملاحظات</label>
+            <input type="text" id="req_notes" placeholder="تفاصيل إضافية...">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="reqSubmit()">📤 Submit for Approval</button>
+        </div>
+      </div>
+
+      <!-- Role 1: filter -->
+      <div id="req_admin_filters" style="display:none;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button onclick="reqFilter('all')" id="reqBtn_all" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">الكل</button>
+        <button onclick="reqFilter('pending')" id="reqBtn_pending" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">⏳ Pending</button>
+        <button onclick="reqFilter('approved')" id="reqBtn_approved" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">✅ Approved</button>
+        <button onclick="reqFilter('rejected')" id="reqBtn_rejected" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">❌ Rejected</button>
+      </div>
+
+      <div id="requests_feed"></div>
+    </div><!-- /tasks_section_requests -->
+
   </div>
 
 
@@ -1685,6 +1802,44 @@
     </div>
 
     <div id="leaves_feed"></div>
+  </div>
+
+
+  <!-- requests merged into tasks tab -->
+  <div style="display:none;" id="panel-requests">
+    <div class="section-title">📋 Request Approvals</div>
+
+    <!-- Role 3: Submit request -->
+    <div class="h-builder" id="req_submit_form" style="display:none;">
+      <div class="h-section-label">إرسال Request للموافقة</div>
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="field">
+          <label>Request Number</label>
+          <input type="text" id="req_number" placeholder="e.g. REQ-2026-001">
+        </div>
+        <div class="field">
+          <label>Project Name</label>
+          <input type="text" id="req_project" placeholder="Project name...">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label>Notes</label>
+          <input type="text" id="req_notes" placeholder="Additional details...">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="reqSubmit()">📤 إرسال للموافقة</button>
+      </div>
+    </div>
+
+    <!-- Filter - role 1 only -->
+    <div id="req_admin_filters" style="display:none;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <button onclick="reqFilter('all')" id="reqBtn_all" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">الكل</button>
+      <button onclick="reqFilter('pending')" id="reqBtn_pending" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">⏳ انتظار</button>
+      <button onclick="reqFilter('approved')" id="reqBtn_approved" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">✅ Approved</button>
+      <button onclick="reqFilter('rejected')" id="reqBtn_rejected" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">❌ Rejected</button>
+    </div>
+
+    <div id="requests_feed"></div>
   </div>
 
 
@@ -2199,6 +2354,14 @@
     if (name === 'projects') {
       renderProjectsTable();
     }
+    if (name === 'requests') {
+      const isRole1 = currentUser && currentUser.roles.includes(1);
+      const canSubmitReq = currentUser && currentUser.roles.includes(3);
+      const reqForm = document.getElementById('req_submit_form');
+      const reqFilters = document.getElementById('req_admin_filters');
+      if (reqForm) reqForm.style.display = canSubmitReq ? '' : 'none';
+      if (reqFilters) reqFilters.style.display = isRole1 ? 'flex' : 'none';
+    }
     if (name === 'leaves') {
       const nameInp = document.getElementById('leave_name');
       if (nameInp && currentUser) nameInp.value = currentUser.name;
@@ -2210,7 +2373,13 @@
       taskPopulateAssignee();
       // Show assign form for admin only
       const assignForm = document.getElementById('task_assign_form');
-      if (assignForm) assignForm.style.display = currentUser && currentUser.roles.some(r=>[1,2].includes(r)) ? '' : 'none';
+      if (assignForm) assignForm.style.display = currentUser && currentUser.roles.includes(1) ? '' : 'none';
+      // Hide requests sub-tab for roles that can't use it
+      const reqSubBtn = document.getElementById('taskSubBtn_requests');
+      const isRole3orAdmin = currentUser && currentUser.roles.some(r=>[1,2,3].includes(r));
+      if (reqSubBtn) reqSubBtn.style.display = isRole3orAdmin ? '' : 'none';
+      // Start on mytasks
+      taskSubTab('mytasks');
     }
     if (name === 'inventory') {
       const adminSec = document.getElementById('inv_admin_section');
@@ -2598,7 +2767,7 @@
   const ROLE_TABS = {
     1: ['projects','add','view','haraka','leaves','tasks','tools','inventory','settings'],
     2: ['projects','add','view','haraka','leaves','tasks','tools','inventory'],
-    3: ['projects','add','view','haraka','leaves'],
+    3: ['projects','add','view','haraka','leaves','tasks'],
     4: ['tools','haraka','inventory','leaves'],
     5: ['inventory','leaves'],
   };
@@ -3079,8 +3248,102 @@
   };
 
 
+
+  // ══════════════════════════════════════
+  // SETTINGS SUB-TABS
+  // ══════════════════════════════════════
+  window.settingsSubTab = function(tab) {
+    ['techs','drivers','users'].forEach(t => {
+      const sec = document.getElementById('settings_section_'+t);
+      const btn = document.getElementById('settingsSubBtn_'+t);
+      if (sec) sec.style.display = t===tab ? '' : 'none';
+      if (btn) {
+        btn.style.borderBottomColor = t===tab ? 'var(--accent)' : 'transparent';
+        btn.style.color = t===tab ? 'var(--accent)' : 'var(--text3)';
+        btn.style.fontWeight = t===tab ? '600' : '500';
+      }
+    });
+    if (tab === 'users') renderSettingsUsers();
+    if (tab === 'drivers') renderDriversList();
+    if (tab === 'techs') {
+      // Move users table into techs sub-tab if role 1
+      const usersSection = document.getElementById('settings_users_section');
+      if (usersSection) usersSection.style.display = window._isRole1 ? '' : 'none';
+    }
+  };
+
+  // ══════════════════════════════════════
+  // DRIVERS
+  // ══════════════════════════════════════
+  let driversData = [];
+
+  function driversStartListener() {
+    onSnapshot(doc(db,'settings','drivers'), snap => {
+      driversData = snap.exists() ? (snap.data().list || []) : [];
+      renderDriversList();
+      hPopulateDrivers();
+    });
+  }
+
+  function renderDriversList() {
+    const el = document.getElementById('drivers_list');
+    if (!el) return;
+    if (!driversData.length) { el.innerHTML = '<div style="font-size:13px;color:var(--text3);padding:8px;">مفيش سواقين متسجلين</div>'; return; }
+    el.innerHTML = driversData.map((d,i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;margin-bottom:8px;">
+        <div>
+          <span style="font-weight:600;">🚗 ${esc(d.name)}</span>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--accent);margin-right:12px;">📞 ${esc(d.phone)}</span>
+        </div>
+        <button onclick="removeDriver(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;">×</button>
+      </div>
+    `).join('');
+  }
+
+  window.addDriver = async function() {
+    const name  = document.getElementById('new_driver_name').value.trim();
+    const phone = document.getElementById('new_driver_phone').value.trim();
+    if (!name || !phone) { toast('اكتب الاسم والتليفون', 'error'); return; }
+    driversData.push({ name, phone });
+    document.getElementById('new_driver_name').value = '';
+    document.getElementById('new_driver_phone').value = '';
+    await setDoc(doc(db,'settings','drivers'), { list: driversData });
+    toast('✅ تمت الإضافة', 'success');
+  };
+
+  window.removeDriver = async function(i) {
+    driversData.splice(i,1);
+    await setDoc(doc(db,'settings','drivers'), { list: driversData });
+    toast('تم الحذف', 'success');
+  };
+
+  function hPopulateDrivers() {
+    const sel = document.getElementById('h_car_detail');
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— اختار سواق —</option>' +
+      driversData.map(d => `<option value="${esc(d.name)} — ${esc(d.phone)}">${esc(d.name)} — ${esc(d.phone)}</option>`).join('');
+    if (current) sel.value = current;
+  }
+
+  window.hSelectDriver = function() {
+    // Just selecting updates the value automatically
+  };
+
+  window.hCarChanged = function() {
+    const car = document.getElementById('h_car').value;
+    const driverField = document.getElementById('h_driver_field');
+    const driverSel = document.getElementById('h_car_detail');
+    if (car === 'مواصلات') {
+      if (driverField) { driverField.style.opacity = '0.4'; driverField.style.pointerEvents = 'none'; }
+      if (driverSel) driverSel.value = '';
+    } else {
+      if (driverField) { driverField.style.opacity = '1'; driverField.style.pointerEvents = ''; }
+    }
+  };
+
   window.renderSettingsUsers = function() {
-    const tbody = document.getElementById('settings_users_tbody');
+    const tbody = document.getElementById('settings_users_tbody') || document.getElementById('settings_users_tbody2');
     if (!tbody) return;
     // Only show for role 1
     const section = document.getElementById('settings_users_section');
@@ -3149,20 +3412,20 @@
     const priority = document.getElementById('task_priority').value;
     const due      = document.getElementById('task_due').value;
     const desc     = document.getElementById('task_desc').value.trim();
-    const reqNums  = document.getElementById('task_req_nums') ? document.getElementById('task_req_nums').value.trim() : '';
+
     if (!assigneeEmail || !title) { toast('اختار الشخص واكتب التاسك', 'error'); return; }
     const assignee = ALL_USERS_FOR_TASKS.find(u=>u.email===assigneeEmail);
     try {
       await addDoc(collection(db,'tasks'), {
         assigneeEmail, assigneeName: assignee?.name || assigneeEmail,
-        title, priority, due, desc, reqNums,
+        title, priority, due, desc,
         status: 'running',
         assignedBy: currentUser.name,
         assignedByEmail: currentUser.email,
         createdAt: Date.now(),
         feedback: [],
       });
-      ['task_title','task_desc','task_due','task_req_nums'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+      ['task_title','task_desc','task_due'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('task_assignee').value='';
       document.getElementById('task_priority').selectedIndex=0;
       toast('✅ Task assigned!', 'success');
@@ -3201,6 +3464,124 @@
 
   // Swipe to delete for tasks
   let _touchStartX = 0;
+
+
+  // ══════════════════════════════════════
+  // REQUEST APPROVALS JS
+  // ══════════════════════════════════════
+  let reqsList = [];
+  let reqsFilter = 'all';
+
+  function reqsStartListener() {
+    onSnapshot(query(collection(db,'req_approvals'), orderBy('createdAt','desc')), snap => {
+      reqsList = [];
+      snap.forEach(d => reqsList.push({id:d.id,...d.data()}));
+      reqsRenderFeed();
+    });
+  }
+
+
+  window.taskSubTab = function(tab) {
+    ['mytasks','requests'].forEach(t => {
+      const section = document.getElementById('tasks_section_'+t);
+      const btn = document.getElementById('taskSubBtn_'+t);
+      if (section) section.style.display = t===tab ? '' : 'none';
+      if (btn) {
+        btn.style.borderBottomColor = t===tab ? 'var(--accent)' : 'transparent';
+        btn.style.color = t===tab ? 'var(--accent)' : 'var(--text3)';
+      }
+    });
+    if (tab === 'requests') {
+      const isRole1 = currentUser && currentUser.roles.includes(1);
+      const canSubmitReq = currentUser && currentUser.roles.includes(3);
+      const reqForm = document.getElementById('req_submit_form');
+      const reqFilters = document.getElementById('req_admin_filters');
+      if (reqForm) reqForm.style.display = canSubmitReq ? '' : 'none';
+      if (reqFilters) reqFilters.style.display = isRole1 ? 'flex' : 'none';
+      reqsRenderFeed();
+    }
+  };
+
+  window.reqSubmit = async function() {
+    const number  = document.getElementById('req_number').value.trim();
+    const project = document.getElementById('req_project').value.trim();
+    const notes   = document.getElementById('req_notes').value.trim();
+    if (!number) { toast('اكتب رقم الـ Request', 'error'); return; }
+    try {
+      await addDoc(collection(db,'req_approvals'), {
+        number, project, notes,
+        submittedBy: currentUser.name,
+        submittedByEmail: currentUser.email,
+        status: 'pending',
+        createdAt: Date.now(),
+        adminReply: '',
+      });
+      ['req_number','req_project','req_notes'].forEach(id=>document.getElementById(id).value='');
+      toast('✅ Request submitted successfully', 'success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  window.reqFilter = function(f) {
+    reqsFilter = f;
+    ['all','pending','approved','rejected'].forEach(k=>{
+      const btn = document.getElementById('reqBtn_'+k);
+      if(btn) btn.className='btn '+(k===f?'btn-primary':'btn-ghost');
+    });
+    reqsRenderFeed();
+  };
+
+  window.reqApprove = async function(id) {
+    await updateDoc(doc(db,'req_approvals',id), {
+      status:'approved', decidedBy:currentUser.name, decidedAt:Date.now()
+    });
+    toast('✅ Approved','success');
+  };
+
+  window.reqReject = async function(id) {
+    const reply = prompt('سبب الرفض (اختياري):') || '';
+    await updateDoc(doc(db,'req_approvals',id), {
+      status:'rejected', adminReply:reply, decidedBy:currentUser.name, decidedAt:Date.now()
+    });
+    toast('❌ Rejected','success');
+  };
+
+  function reqsRenderFeed() {
+    const feed = document.getElementById('requests_feed');
+    if (!feed) return;
+    const isAdmin = currentUser && currentUser.roles.includes(1);
+    // Only role 1 sees all requests
+    let list = isAdmin ? reqsList : reqsList.filter(r=>r.submittedByEmail===currentUser?.email);
+    if (reqsFilter !== 'all') list = list.filter(r=>r.status===reqsFilter);
+
+    if (!list.length) {
+      feed.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>مفيش requests</p></div>';
+      return;
+    }
+
+    const statusColor = { pending:'var(--warn)', approved:'var(--success)', rejected:'var(--danger)' };
+    const statusLabel = { pending:'⏳ Pending', approved:'✅ Approved', rejected:'❌ Rejected' };
+
+    feed.innerHTML = list.map(r => `
+      <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${statusColor[r.status]};border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-size:16px;font-weight:700;font-family:var(--mono);">📋 ${esc(r.number)}</div>
+          <span style="font-size:12px;font-weight:600;color:${statusColor[r.status]};">${statusLabel[r.status]}</span>
+        </div>
+        ${r.project ? `<div style="font-size:13px;color:var(--text2);margin-bottom:4px;">🏗️ ${esc(r.project)}</div>` : ''}
+        ${r.notes ? `<div style="font-size:13px;color:var(--text3);margin-bottom:4px;">📝 ${esc(r.notes)}</div>` : ''}
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">
+          👤 ${esc(r.submittedBy)} — ${new Date(r.createdAt).toLocaleDateString('ar-EG')}
+        </div>
+        ${r.adminReply ? `<div style="font-size:12px;color:var(--danger);padding:6px 10px;background:rgba(255,68,85,0.08);border-radius:6px;margin-bottom:8px;">💬 ${esc(r.adminReply)}</div>` : ''}
+        ${r.decidedBy ? `<div style="font-size:11px;color:var(--text3);">بواسطة ${esc(r.decidedBy)}</div>` : ''}
+        ${(currentUser && currentUser.roles.includes(1)) && r.status==='pending' ? `
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button onclick="reqApprove('${r.id}')" style="flex:1;background:rgba(0,229,160,0.15);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">✅ Approved</button>
+            <button onclick="reqReject('${r.id}')" style="flex:1;background:rgba(255,68,85,0.1);border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">❌ Rejected</button>
+          </div>` : ''}
+      </div>
+    `).join('');
+  }
 
   // ══════════════════════════════════════
   // LEAVE REQUEST JS
@@ -3355,8 +3736,8 @@
   function taskRenderFeed() {
     const feed = document.getElementById('tasks_feed');
     if (!feed) return;
-    const isAdmin = currentUser && currentUser.roles.some(r=>[1,2].includes(r));
-    // Filter: admin sees all, others see only their own
+    const isAdmin = currentUser && currentUser.roles.includes(1);
+    // Only role 1 sees all tasks, everyone else sees only their own
     let list = isAdmin ? tasksList : tasksList.filter(t=>t.assigneeEmail===currentUser?.email);
     if (tasksFilterVal !== 'all') list = list.filter(t=>t.status===tasksFilterVal);
 
@@ -3372,7 +3753,7 @@
 
     feed.innerHTML = list.map(t => `
       <div class="task-card-wrap" id="wrap_${t.id}">
-      ${window._isRole1 ? `<div class="task-delete-reveal" onclick="taskDelete('${t.id}')"><span>🗑 Clear</span></div>` : ''}
+      ${window._isRole1 ? `<div class="task-delete-reveal" onclick="taskDelete('${t.id}')"><span style="font-size:20px;">🗑</span></div>` : ''}
       <div class="task-card-inner" id="card_${t.id}"
         ${window._isRole1 ? `
           ontouchstart="taskTouchStart(event,'${t.id}')"
@@ -3390,7 +3771,7 @@
         <div style="font-size:16px;font-weight:700;margin-bottom:4px;">${esc(t.title)}</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:4px;">👤 ${esc(t.assigneeName)}</div>
         ${t.desc ? `<div style="font-size:13px;color:var(--text3);margin-bottom:4px;">📝 ${esc(t.desc)}</div>` : ''}
-        ${t.reqNums ? `<div style="font-size:12px;color:var(--accent);margin-bottom:8px;font-family:var(--mono);">📋 Requests: ${esc(t.reqNums)}</div>` : ''}
+
         <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">Assigned by ${esc(t.assignedBy)} — ${new Date(t.createdAt).toLocaleDateString('ar-EG')}</div>
 
         <!-- Status update - assignee or admin -->
@@ -3708,9 +4089,11 @@
       hInitDate();
       tStartListener();
       settingsStartListener();
+      driversStartListener();
       invStartListeners();
       tasksStartListener();
       leavesStartListener();
+      reqsStartListener();
       invCheckQRParam();
       if (!checkStoredLogin()) { document.getElementById('login_screen').style.display='flex'; document.getElementById('main_app').style.display='none'; }
       const hDateInp = document.getElementById('h_date');
