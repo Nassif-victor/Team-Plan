@@ -855,6 +855,17 @@
   .req-card.approved { border-right-color:var(--success); }
   .req-card.declined { border-right-color:var(--danger); }
   .req-card.return_pending { border-right-color:var(--accent2); }
+
+  /* ── SWIPE TO DELETE ── */
+  .task-card-wrap { position:relative; overflow:hidden; border-radius:12px; margin-bottom:12px; }
+  .task-card-inner { transition:transform 0.3s ease; background:var(--card); }
+  .task-card-inner.swiped { transform:translateX(-80px); }
+  .task-delete-reveal {
+    position:absolute; right:0; top:0; bottom:0; width:80px;
+    background:var(--danger); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; border-radius:0 12px 12px 0;
+  }
+  .task-delete-reveal span { color:#fff; font-size:12px; font-weight:700; }
 </style>
 </head>
 <body>
@@ -934,6 +945,9 @@
   </button>
   <button class="tab-btn" onclick="switchTab('inventory')" id="tab-inventory">
     <span class="tab-icon">📦</span> العدة
+  </button>
+  <button class="tab-btn" onclick="switchTab('leaves')" id="tab-leaves">
+    <span class="tab-icon">🏖</span> طلب إجازة
   </button>
   <button class="tab-btn" onclick="switchTab('tasks')" id="tab-tasks">
     <span class="tab-icon">✅</span> Task Assignment
@@ -1252,6 +1266,7 @@
         <label>👨🏻‍💻 Engineers</label>
         <select id="h_eng_select" onchange="hAddFromSelect('eng')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;width:100%;direction:rtl;">
           <option value="">— اختار مهندس —</option>
+          <option value="نصيف فيكتور">نصيف فيكتور</option>
           <option value="عبد الرحمن فتحي">عبد الرحمن فتحي</option>
           <option value="فادي فرج">فادي فرج</option>
           <option value="بيتر أمجد">بيتر أمجد</option>
@@ -1274,12 +1289,13 @@
           <option value="مينا صبري">مينا صبري</option>
           <option value="حسام صلاح">حسام صلاح</option>
           <option value="محمود فرغلي">محمود فرغلي</option>
-          <option value="مكاريوس إسحق">مكاريوس إسحق</option>
+          <option value="مكاريوس اسحق">مكاريوس اسحق</option>
           <option value="كيرلس ياسر">كيرلس ياسر</option>
           <option value="أيمن سيد">أيمن سيد</option>
           <option value="كيرلس ابراهيم">كيرلس ابراهيم</option>
           <option value="محمد رمضان">محمد رمضان</option>
           <option value="بيشوي عدلي">بيشوي عدلي</option>
+          <option value="مينا سامي">مينا سامي</option>
         </select>
         <div class="h-tags-box" id="h_tech_wrap" style="margin-top:6px;min-height:32px;">
           <input class="h-bare-input" id="h_tech_input" style="display:none;" onkeydown="hTagKey(event,'tech')">
@@ -1296,6 +1312,12 @@
         <div class="field"><label>🕐 وقت التحرك</label>
           <input type="text" id="h_depart" placeholder="8:30"></div>
       </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>🆘 أسماء الدعم</label>
+        <div class="h-tags-box" id="h_support_wrap" onclick="document.getElementById('h_support_input').focus()">
+          <input class="h-bare-input" id="h_support_input" placeholder="اسم + Enter" onkeydown="hTagKey(event,'support')">
+        </div>
+      </div>
       <div class="form-actions">
         <button class="btn btn-ghost" onclick="hClearEntry()">Clear</button>
         <button class="btn btn-primary" onclick="hAddEntry()">+ Add to List</button>
@@ -1307,20 +1329,92 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;">
       <div class="form-card" style="padding:14px;">
         <div class="form-card-title" style="margin-bottom:8px;">🏢 Office</div>
-        <div class="h-tags-box" id="h_office_wrap" onclick="document.getElementById('h_office_input').focus()">
-          <input class="h-bare-input" id="h_office_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'office')">
+        <select onchange="hAddFromSelect('office')" id="h_office_select" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;direction:rtl;margin-bottom:6px;">
+          <option value="">— اختار اسم —</option>
+          <option value="نصيف فيكتور">نصيف فيكتور</option>
+          <option value="عبد الرحمن فتحي">عبد الرحمن فتحي</option>
+          <option value="فادي فرج">فادي فرج</option>
+          <option value="بيتر أمجد">بيتر أمجد</option>
+          <option value="أحمد عاطف">أحمد عاطف</option>
+          <option value="رمزي قدري">رمزي قدري</option>
+          <option value="صمويل نجاح">صمويل نجاح</option>
+          <option value="محسن يوسف">محسن يوسف</option>
+          <option value="مصطفى محمد">مصطفى محمد</option>
+          <option value="محمد سيد">محمد سيد</option>
+          <option value="مينا عادل">مينا عادل</option>
+          <option value="مينا صبري">مينا صبري</option>
+          <option value="حسام صلاح">حسام صلاح</option>
+          <option value="محمود فرغلي">محمود فرغلي</option>
+          <option value="مكاريوس اسحق">مكاريوس اسحق</option>
+          <option value="كيرلس ياسر">كيرلس ياسر</option>
+          <option value="أيمن سيد">أيمن سيد</option>
+          <option value="كيرلس ابراهيم">كيرلس ابراهيم</option>
+          <option value="محمد رمضان">محمد رمضان</option>
+          <option value="بيشوي عدلي">بيشوي عدلي</option>
+          <option value="مينا سامي">مينا سامي</option>
+        </select>
+        <div class="h-tags-box" id="h_office_wrap" style="min-height:32px;">
+          <input class="h-bare-input" id="h_office_input" style="display:none;" onkeydown="hTagKey(event,'office')">
         </div>
       </div>
       <div class="form-card" style="padding:14px;">
         <div class="form-card-title" style="margin-bottom:8px;">😴 Annual Leave</div>
-        <div class="h-tags-box" id="h_vacation_wrap" onclick="document.getElementById('h_vacation_input').focus()">
-          <input class="h-bare-input" id="h_vacation_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'vacation')">
+        <select onchange="hAddFromSelect('vacation')" id="h_vacation_select" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;direction:rtl;margin-bottom:6px;">
+          <option value="">— اختار اسم —</option>
+          <option value="نصيف فيكتور">نصيف فيكتور</option>
+          <option value="عبد الرحمن فتحي">عبد الرحمن فتحي</option>
+          <option value="فادي فرج">فادي فرج</option>
+          <option value="بيتر أمجد">بيتر أمجد</option>
+          <option value="أحمد عاطف">أحمد عاطف</option>
+          <option value="رمزي قدري">رمزي قدري</option>
+          <option value="صمويل نجاح">صمويل نجاح</option>
+          <option value="محسن يوسف">محسن يوسف</option>
+          <option value="مصطفى محمد">مصطفى محمد</option>
+          <option value="محمد سيد">محمد سيد</option>
+          <option value="مينا عادل">مينا عادل</option>
+          <option value="مينا صبري">مينا صبري</option>
+          <option value="حسام صلاح">حسام صلاح</option>
+          <option value="محمود فرغلي">محمود فرغلي</option>
+          <option value="مكاريوس اسحق">مكاريوس اسحق</option>
+          <option value="كيرلس ياسر">كيرلس ياسر</option>
+          <option value="أيمن سيد">أيمن سيد</option>
+          <option value="كيرلس ابراهيم">كيرلس ابراهيم</option>
+          <option value="محمد رمضان">محمد رمضان</option>
+          <option value="بيشوي عدلي">بيشوي عدلي</option>
+          <option value="مينا سامي">مينا سامي</option>
+        </select>
+        <div class="h-tags-box" id="h_vacation_wrap" style="min-height:32px;">
+          <input class="h-bare-input" id="h_vacation_input" style="display:none;" onkeydown="hTagKey(event,'vacation')">
         </div>
       </div>
       <div class="form-card" style="padding:14px;">
         <div class="form-card-title" style="margin-bottom:8px;">🤒 Sick Leave</div>
-        <div class="h-tags-box" id="h_sick_wrap" onclick="document.getElementById('h_sick_input').focus()">
-          <input class="h-bare-input" id="h_sick_input" placeholder="الاسم + Enter" onkeydown="hTagKey(event,'sick')">
+        <select onchange="hAddFromSelect('sick')" id="h_sick_select" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;direction:rtl;margin-bottom:6px;">
+          <option value="">— اختار اسم —</option>
+          <option value="نصيف فيكتور">نصيف فيكتور</option>
+          <option value="عبد الرحمن فتحي">عبد الرحمن فتحي</option>
+          <option value="فادي فرج">فادي فرج</option>
+          <option value="بيتر أمجد">بيتر أمجد</option>
+          <option value="أحمد عاطف">أحمد عاطف</option>
+          <option value="رمزي قدري">رمزي قدري</option>
+          <option value="صمويل نجاح">صمويل نجاح</option>
+          <option value="محسن يوسف">محسن يوسف</option>
+          <option value="مصطفى محمد">مصطفى محمد</option>
+          <option value="محمد سيد">محمد سيد</option>
+          <option value="مينا عادل">مينا عادل</option>
+          <option value="مينا صبري">مينا صبري</option>
+          <option value="حسام صلاح">حسام صلاح</option>
+          <option value="محمود فرغلي">محمود فرغلي</option>
+          <option value="مكاريوس اسحق">مكاريوس اسحق</option>
+          <option value="كيرلس ياسر">كيرلس ياسر</option>
+          <option value="أيمن سيد">أيمن سيد</option>
+          <option value="كيرلس ابراهيم">كيرلس ابراهيم</option>
+          <option value="محمد رمضان">محمد رمضان</option>
+          <option value="بيشوي عدلي">بيشوي عدلي</option>
+          <option value="مينا سامي">مينا سامي</option>
+        </select>
+        <div class="h-tags-box" id="h_sick_wrap" style="min-height:32px;">
+          <input class="h-bare-input" id="h_sick_input" style="display:none;" onkeydown="hTagKey(event,'sick')">
         </div>
       </div>
     </div>
@@ -1521,6 +1615,10 @@
           <label>Description</label>
           <input type="text" id="task_desc" placeholder="Task description...">
         </div>
+        <div class="field" style="grid-column:1/-1;" id="task_req_wrap">
+          <label>Request Numbers (optional)</label>
+          <input type="text" id="task_req_nums" placeholder="e.g. REQ-001, REQ-002...">
+        </div>
       </div>
       <div class="form-actions">
         <button class="btn btn-primary" onclick="taskAssign()">+ Assign Task</button>
@@ -1537,6 +1635,56 @@
     </div>
 
     <div id="tasks_feed"></div>
+  </div>
+
+
+  <!-- ─── LEAVE REQUEST TAB ─── -->
+  <div class="tab-panel" id="panel-leaves">
+    <div class="section-title">🏖 طلب إجازة</div>
+
+    <!-- Request form - all roles -->
+    <div class="h-builder" id="leave_request_form">
+      <div class="h-section-label">طلب إجازة جديد</div>
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="field">
+          <label>الاسم</label>
+          <input type="text" id="leave_name" placeholder="اسمك" readonly style="opacity:0.7;">
+        </div>
+        <div class="field">
+          <label>نوع الإجازة</label>
+          <select id="leave_type" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;">
+            <option value="annual">😴 إجازة سنوية</option>
+            <option value="sick">🤒 إجازة مرضية</option>
+            <option value="emergency">🚨 إجازة طارئة</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>من تاريخ</label>
+          <input type="date" id="leave_from">
+        </div>
+        <div class="field">
+          <label>إلى تاريخ</label>
+          <input type="date" id="leave_to">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label>ملاحظات</label>
+          <input type="text" id="leave_notes" placeholder="سبب أو تفاصيل إضافية...">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="leaveSubmit()">📤 إرسال الطلب</button>
+      </div>
+    </div>
+
+    <!-- Admin: filter -->
+    <div id="leave_admin_filters" style="display:none;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <button onclick="leaveFilter('all')" id="leaveBtn_all" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">الكل</button>
+      <button onclick="leaveFilter('pending')" id="leaveBtn_pending" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">⏳ انتظار</button>
+      <button onclick="leaveFilter('approved')" id="leaveBtn_approved" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">✅ موافق</button>
+      <button onclick="leaveFilter('rejected')" id="leaveBtn_rejected" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">❌ مرفوض</button>
+    </div>
+
+    <div id="leaves_feed"></div>
   </div>
 
 
@@ -1752,6 +1900,9 @@
         </td>
       </tr>
     `).join('');
+
+    // Init swipe touch handlers
+    if (window._isRole1) taskInitSwipe();
   }
 
   function renderViewTable(list, filterDay) {
@@ -2048,6 +2199,13 @@
     if (name === 'projects') {
       renderProjectsTable();
     }
+    if (name === 'leaves') {
+      const nameInp = document.getElementById('leave_name');
+      if (nameInp && currentUser) nameInp.value = currentUser.name;
+      const isAdmin = currentUser && currentUser.roles.some(r=>[1,2].includes(r));
+      const adminFilters = document.getElementById('leave_admin_filters');
+      if (adminFilters) adminFilters.style.display = isAdmin ? 'flex' : 'none';
+    }
     if (name === 'tasks') {
       taskPopulateAssignee();
       // Show assign form for admin only
@@ -2268,7 +2426,7 @@
   // ══════════════════════════════════════
   // HARAKA JS
   // ══════════════════════════════════════
-  let h_lists = { eng:[], tech:[], office:[], vacation:[], sick:[] };
+  let h_lists = { eng:[], tech:[], office:[], vacation:[], sick:[], support:[] };
   let h_pending = [];
 
   function hInitDate() {
@@ -2290,7 +2448,7 @@
 
   window.hTagKey = function(e, type) {
     if (e.key !== 'Enter') return;
-    const ids = { eng:'h_eng_input', tech:'h_tech_input', office:'h_office_input', vacation:'h_vacation_input', sick:'h_sick_input' };
+    const ids = { eng:'h_eng_input', tech:'h_tech_input', office:'h_office_input', vacation:'h_vacation_input', sick:'h_sick_input', support:'h_support_input' };
     const val = document.getElementById(ids[type]).value.trim();
     if (!val) return;
     h_lists[type].push(val);
@@ -2300,8 +2458,8 @@
   };
 
   function hRenderTags(type) {
-    const wrapIds  = { eng:'h_eng_wrap', tech:'h_tech_wrap', office:'h_office_wrap', vacation:'h_vacation_wrap', sick:'h_sick_wrap' };
-    const inputIds = { eng:'h_eng_input', tech:'h_tech_input', office:'h_office_input', vacation:'h_vacation_input', sick:'h_sick_input' };
+    const wrapIds  = { eng:'h_eng_wrap', tech:'h_tech_wrap', office:'h_office_wrap', vacation:'h_vacation_wrap', sick:'h_sick_wrap', support:'h_support_wrap' };
+    const inputIds = { eng:'h_eng_input', tech:'h_tech_input', office:'h_office_input', vacation:'h_vacation_input', sick:'h_sick_input', support:'h_support_input' };
     const wrap = document.getElementById(wrapIds[type]);
     const inp  = document.getElementById(inputIds[type]);
     if (!wrap || !inp) return;
@@ -2355,8 +2513,8 @@
   window.hClearEntry = function() {
     ['h_project','h_number','h_car_detail','h_coord','h_depart'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
     document.getElementById('h_car').selectedIndex = 0;
-    h_lists.eng = []; h_lists.tech = [];
-    hRenderTags('eng'); hRenderTags('tech');
+    h_lists.eng = []; h_lists.tech = []; h_lists.support = [];
+    hRenderTags('eng'); hRenderTags('tech'); hRenderTags('support');
     document.getElementById('h_tasks_wrap').innerHTML = '';
   };
 
@@ -2390,16 +2548,17 @@
       const newOffice   = h_lists.office.length   ? [...h_lists.office]   : (existing.office   || []);
       const newVacation = h_lists.vacation.length ? [...h_lists.vacation] : (existing.vacation || []);
       const newSick     = h_lists.sick.length     ? [...h_lists.sick]     : (existing.sick     || []);
+      const newSupport  = h_lists.support.length  ? [...h_lists.support]  : (existing.support  || []);
 
       await setDoc(docRef, {
         date:dateVal, publishedAt:Date.now(),
         entries: mergedEntries,
         confirmations: existingConf,
-        office: newOffice, vacation: newVacation, sick: newSick,
+        office: newOffice, vacation: newVacation, sick: newSick, support: newSupport,
       });
-      h_pending=[]; h_lists.office=[]; h_lists.vacation=[]; h_lists.sick=[];
+      h_pending=[]; h_lists.office=[]; h_lists.vacation=[]; h_lists.sick=[]; h_lists.support=[];
       hRenderPending();
-      ['office','vacation','sick'].forEach(t=>hRenderTags(t));
+      ['office','vacation','sick','support'].forEach(t=>hRenderTags(t));
       toast('✅ تم الحفظ!', 'success');
       hLoadDay(dateVal);
     } catch(e) { toast('Error: '+e.message,'error'); }
@@ -2427,20 +2586,21 @@
     'm.sabry@nassifteam.com':     { password: 'BkyU$9!c', roles: [4], name: 'مينا صبري' },
     'h.salah@nassifteam.com':     { password: 'rN0vtVb!', roles: [4], name: 'حسام صلاح' },
     'm.farghaly@nassifteam.com':  { password: '$Re05Cyf', roles: [4], name: 'محمود فرغلي' },
-    'm.isaac@nassifteam.com':     { password: '08zI%Xn#', roles: [4], name: 'مكاريوس إسحق' },
+    'm.isaac@nassifteam.com':     { password: '08zI%Xn#', roles: [4], name: 'مكاريوس اسحق' },
     'k.yasser@nassifteam.com':    { password: 'vVgw8U!9', roles: [4], name: 'كيرلس ياسر' },
     'a.sayed@nassifteam.com':     { password: 't1a6uD!S', roles: [4], name: 'أيمن سيد' },
     'k.ibrahim@nassifteam.com':   { password: '0MExV!$H', roles: [4], name: 'كيرلس ابراهيم' },
     'm.ramadan@nassifteam.com':   { password: 'cwF#0cCk', roles: [4], name: 'محمد رمضان' },
+    'm.samy@nassifteam.com':      { password: 'y3KRo$%5', roles: [4], name: 'مينا سامي' },
   };
 
   // Tab permissions per role
   const ROLE_TABS = {
-    1: ['projects','add','view','haraka','tasks','tools','inventory','settings'],
-    2: ['projects','add','view','haraka','tasks','tools','inventory'],
-    3: ['projects','add','view','haraka'],
-    4: ['tools','haraka','inventory'],
-    5: ['inventory'],
+    1: ['projects','add','view','haraka','leaves','tasks','tools','inventory','settings'],
+    2: ['projects','add','view','haraka','leaves','tasks','tools','inventory'],
+    3: ['projects','add','view','haraka','leaves'],
+    4: ['tools','haraka','inventory','leaves'],
+    5: ['inventory','leaves'],
   };
 
   // Tabs that show missing techs (role 1 & 2 only)
@@ -2960,11 +3120,12 @@
     { email:'m.sabry@nassifteam.com',    name:'مينا صبري' },
     { email:'h.salah@nassifteam.com',    name:'حسام صلاح' },
     { email:'m.farghaly@nassifteam.com', name:'محمود فرغلي' },
-    { email:'m.isaac@nassifteam.com',    name:'مكاريوس إسحق' },
+    { email:'m.isaac@nassifteam.com',    name:'مكاريوس اسحق' },
     { email:'k.yasser@nassifteam.com',   name:'كيرلس ياسر' },
     { email:'a.sayed@nassifteam.com',    name:'أيمن سيد' },
     { email:'k.ibrahim@nassifteam.com',  name:'كيرلس ابراهيم' },
     { email:'m.ramadan@nassifteam.com',  name:'محمد رمضان' },
+    { email:'m.samy@nassifteam.com',      name:'مينا سامي' },
   ];
 
   function taskPopulateAssignee() {
@@ -2988,19 +3149,20 @@
     const priority = document.getElementById('task_priority').value;
     const due      = document.getElementById('task_due').value;
     const desc     = document.getElementById('task_desc').value.trim();
+    const reqNums  = document.getElementById('task_req_nums') ? document.getElementById('task_req_nums').value.trim() : '';
     if (!assigneeEmail || !title) { toast('اختار الشخص واكتب التاسك', 'error'); return; }
     const assignee = ALL_USERS_FOR_TASKS.find(u=>u.email===assigneeEmail);
     try {
       await addDoc(collection(db,'tasks'), {
         assigneeEmail, assigneeName: assignee?.name || assigneeEmail,
-        title, priority, due, desc,
+        title, priority, due, desc, reqNums,
         status: 'running',
         assignedBy: currentUser.name,
         assignedByEmail: currentUser.email,
         createdAt: Date.now(),
         feedback: [],
       });
-      ['task_title','task_desc','task_due'].forEach(id=>document.getElementById(id).value='');
+      ['task_title','task_desc','task_due','task_req_nums'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
       document.getElementById('task_assignee').value='';
       document.getElementById('task_priority').selectedIndex=0;
       toast('✅ Task assigned!', 'success');
@@ -3036,6 +3198,154 @@
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
 
+
+  // Swipe to delete for tasks
+  let _touchStartX = 0;
+
+  // ══════════════════════════════════════
+  // LEAVE REQUEST JS
+  // ══════════════════════════════════════
+  let leavesList = [];
+  let leavesFilter = 'all';
+
+  function leavesStartListener() {
+    onSnapshot(query(collection(db,'leaves'), orderBy('createdAt','desc')), snap => {
+      leavesList = [];
+      snap.forEach(d => leavesList.push({id:d.id,...d.data()}));
+      leavesRenderFeed();
+    });
+  }
+
+  window.leaveSubmit = async function() {
+    const name  = document.getElementById('leave_name').value.trim();
+    const type  = document.getElementById('leave_type').value;
+    const from  = document.getElementById('leave_from').value;
+    const to    = document.getElementById('leave_to').value;
+    const notes = document.getElementById('leave_notes').value.trim();
+    if (!from || !to) { toast('اختار التاريخ', 'error'); return; }
+    if (!name) { toast('اسمك مش ظاهر - حاول تسجل دخول تاني', 'error'); return; }
+    try {
+      await addDoc(collection(db,'leaves'), {
+        name, email: currentUser.email,
+        type, from, to, notes,
+        status: 'pending',
+        createdAt: Date.now(),
+        adminReply: '',
+      });
+      ['leave_from','leave_to','leave_notes'].forEach(id=>document.getElementById(id).value='');
+      toast('✅ تم إرسال الطلب', 'success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  window.leaveFilter = function(f) {
+    leavesFilter = f;
+    ['all','pending','approved','rejected'].forEach(k=>{
+      const btn = document.getElementById('leaveBtn_'+k);
+      if(btn) btn.className='btn '+(k===f?'btn-primary':'btn-ghost');
+    });
+    leavesRenderFeed();
+  };
+
+  window.leaveApprove = async function(id) {
+    const leave = leavesList.find(l=>l.id===id);
+    if (!leave) return;
+    try {
+      await updateDoc(doc(db,'leaves',id), { status:'approved', decidedBy: currentUser.name, decidedAt: Date.now() });
+      // Auto-add to haraka vacation for each day in range
+      const start = new Date(leave.from);
+      const end   = new Date(leave.to);
+      const cur   = new Date(start);
+      while (cur <= end) {
+        const dateStr = cur.toISOString().split('T')[0];
+        const docRef  = doc(db,'haraka',dateStr);
+        const snap    = await getDoc(docRef);
+        const existing = snap.exists() ? snap.data() : { date:dateStr, entries:[], office:[], vacation:[], sick:[], support:[] };
+        const vacation = existing.vacation || [];
+        if (!vacation.includes(leave.name)) {
+          vacation.push(leave.name);
+          await setDoc(docRef, { ...existing, vacation }, { merge: true });
+        }
+        cur.setDate(cur.getDate()+1);
+      }
+      toast('✅ تمت الموافقة وتم تسجيلها في الحركة','success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  window.leaveReject = async function(id) {
+    const reply = prompt('سبب الرفض (اختياري):') || '';
+    try {
+      await updateDoc(doc(db,'leaves',id), {
+        status:'rejected', adminReply: reply,
+        decidedBy: currentUser.name, decidedAt: Date.now()
+      });
+      toast('❌ تم الرفض','success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  function leavesRenderFeed() {
+    const feed = document.getElementById('leaves_feed');
+    if (!feed) return;
+    const isAdmin = currentUser && currentUser.roles.some(r=>[1,2].includes(r));
+    let list = isAdmin ? leavesList : leavesList.filter(l=>l.email===currentUser?.email);
+    if (leavesFilter !== 'all') list = list.filter(l=>l.status===leavesFilter);
+
+    if (!list.length) {
+      feed.innerHTML='<div class="empty-state"><div class="empty-icon">🏖</div><p>مفيش طلبات إجازة</p></div>';
+      return;
+    }
+
+    const typeLabel   = { annual:'😴 سنوية', sick:'🤒 مرضية', emergency:'🚨 طارئة' };
+    const statusColor = { pending:'var(--warn)', approved:'var(--success)', rejected:'var(--danger)' };
+    const statusLabel = { pending:'⏳ انتظار', approved:'✅ موافق عليها', rejected:'❌ مرفوضة' };
+
+    feed.innerHTML = list.map(l => `
+      <div style="background:var(--card);border:1px solid var(--border);border-right:3px solid ${statusColor[l.status]};border-radius:12px;padding:18px 20px;margin-bottom:12px;direction:rtl;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:14px;font-weight:700;">👤 ${esc(l.name)}</span>
+          <span style="font-size:12px;font-weight:600;color:${statusColor[l.status]};">${statusLabel[l.status]}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:4px;">${typeLabel[l.type]||l.type}</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:4px;">📅 من ${l.from} إلى ${l.to}</div>
+        ${l.notes ? `<div style="font-size:12px;color:var(--text3);margin-bottom:8px;">📝 ${esc(l.notes)}</div>` : ''}
+        ${l.adminReply ? `<div style="font-size:12px;color:var(--danger);margin-bottom:8px;padding:6px 10px;background:rgba(255,68,85,0.08);border-radius:6px;">💬 ${esc(l.adminReply)}</div>` : ''}
+        ${l.decidedBy ? `<div style="font-size:11px;color:var(--text3);">بواسطة ${esc(l.decidedBy)}</div>` : ''}
+        ${isAdmin && l.status==='pending' ? `
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button onclick="leaveApprove('${l.id}')" style="flex:1;background:rgba(0,229,160,0.15);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">✅ Approved</button>
+            <button onclick="leaveReject('${l.id}')" style="flex:1;background:rgba(255,68,85,0.1);border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">❌ Rejected</button>
+          </div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  window.taskTouchStart = function(e, id) {
+    _touchStartX = e.touches[0].clientX;
+  };
+  window.taskTouchEnd = function(e, id) {
+    const dx = e.changedTouches[0].clientX - _touchStartX;
+    if (dx < -50) {
+      document.getElementById('card_'+id)?.classList.add('swiped');
+    } else if (dx > 30) {
+      taskUnswipe(id);
+    }
+  };
+  window.taskUnswipe = function(id) {
+    document.getElementById('card_'+id)?.classList.remove('swiped');
+  };
+  window.taskInitSwipe = function() {
+    // Also handle mouse drag for desktop
+    document.querySelectorAll('.task-card-inner').forEach(el => {
+      let startX = 0;
+      el.addEventListener('mousedown', e => { startX = e.clientX; });
+      el.addEventListener('mouseup', e => {
+        const dx = e.clientX - startX;
+        const id = el.id.replace('card_','');
+        if (dx < -60) el.classList.add('swiped');
+        else if (dx > 30) el.classList.remove('swiped');
+      });
+    });
+  };
+
   window.taskDelete = async function(id) {
     if (!confirm('Delete this task?')) return;
     await deleteDoc(doc(db,'tasks',id));
@@ -3061,7 +3371,15 @@
     const priorityLabel  = { high:'🔴 High', normal:'🟡 Normal', low:'🟢 Low' };
 
     feed.innerHTML = list.map(t => `
-      <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${statusColors[t.status]||'var(--border)'};border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+      <div class="task-card-wrap" id="wrap_${t.id}">
+      ${window._isRole1 ? `<div class="task-delete-reveal" onclick="taskDelete('${t.id}')"><span>🗑 Clear</span></div>` : ''}
+      <div class="task-card-inner" id="card_${t.id}"
+        ${window._isRole1 ? `
+          ontouchstart="taskTouchStart(event,'${t.id}')"
+          ontouchend="taskTouchEnd(event,'${t.id}')"
+          onmouseleave="taskUnswipe('${t.id}')"
+        ` : ''}
+        style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${statusColors[t.status]||'var(--border)'};border-radius:12px;padding:18px 20px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <span style="font-size:12px;background:rgba(0,0,0,0.2);border-radius:4px;padding:2px 8px;color:${priorityColors[t.priority]||'var(--text2)'};">${priorityLabel[t.priority]||t.priority}</span>
@@ -3071,7 +3389,8 @@
         </div>
         <div style="font-size:16px;font-weight:700;margin-bottom:4px;">${esc(t.title)}</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:4px;">👤 ${esc(t.assigneeName)}</div>
-        ${t.desc ? `<div style="font-size:13px;color:var(--text3);margin-bottom:8px;">📝 ${esc(t.desc)}</div>` : ''}
+        ${t.desc ? `<div style="font-size:13px;color:var(--text3);margin-bottom:4px;">📝 ${esc(t.desc)}</div>` : ''}
+        ${t.reqNums ? `<div style="font-size:12px;color:var(--accent);margin-bottom:8px;font-family:var(--mono);">📋 Requests: ${esc(t.reqNums)}</div>` : ''}
         <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">Assigned by ${esc(t.assignedBy)} — ${new Date(t.createdAt).toLocaleDateString('ar-EG')}</div>
 
         <!-- Status update - assignee or admin -->
@@ -3096,12 +3415,13 @@
             onkeydown="if(event.key==='Enter') taskSendFeedback('${t.id}')">
           <button onclick="taskSendFeedback('${t.id}')" style="background:var(--accent2);border:none;color:#fff;border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;">Send</button>
         </div>
-      </div>
+      </div><!-- /task-card-inner -->
+      </div><!-- /task-card-wrap -->
     `).join('');
   }
 
   window.hAddFromSelect = function(type) {
-    const selIds = { eng:'h_eng_select', tech:'h_tech_select' };
+    const selIds = { eng:'h_eng_select', tech:'h_tech_select', office:'h_office_select', vacation:'h_vacation_select', sick:'h_sick_select' };
     const sel = document.getElementById(selIds[type]);
     if (!sel || !sel.value) return;
     const val = sel.value;
@@ -3195,13 +3515,31 @@
       html += '</div><hr style="border:none;border-top:1px solid var(--border);margin:0;">';
     });
 
+    const sectionKeys = {'🏢 Office':'office','😴 Annual Leave':'vacation','🤒 Sick Leave':'sick'};
     const showSection = (title, items, col, chipStyle) => {
+      const key = sectionKeys[title];
       html += '<div class="haraka-entry" style="border-right-color:'+col+';">';
-      html += '<div class="haraka-project-name">'+title+'</div>';
-      if (items&&items.length) { html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">'; items.forEach(n=>{html+='<span style="'+chipStyle+'">'+esc(n)+'</span>';}); html+='</div>'; }
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+      html += '<div class="haraka-project-name" style="margin-bottom:0;">'+title+'</div>';
+      if (window._isAdminish && key) html += '<button onclick="hEditSection(\''+dateStr+'\',\''+key+'\')" style="background:transparent;border:1px solid rgba(0,194,255,0.3);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">✏️ تعديل</button>';
+      html += '</div>';
+      if (items&&items.length) { html+='<div style="display:flex;flex-wrap:wrap;gap:6px;">'; items.forEach(n=>{html+='<span style="'+chipStyle+'">'+esc(n)+'</span>';}); html+='</div>'; }
       else html+='<div style="font-size:12px;color:var(--text3);">—</div>';
       html += '</div>';
     };
+    // Support coordination confirm
+    if (data.support && data.support.length) {
+      const suppConf = confirmData['support_0'];
+      html += '<div class="haraka-entry" style="border-right-color:#a855f7;">';
+      html += '<div class="haraka-project-name">🆘 الدعم</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">';
+      data.support.forEach(n => { html += '<span style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#a855f7;border-radius:20px;padding:3px 10px;font-size:12px;">👤 '+esc(n)+'</span>'; });
+      html += '</div>';
+      if (suppConf) html += '<div class="confirm-name" style="color:#a855f7;">✅ تم التنسيق مع الدعم بواسطة '+esc(suppConf.by)+' الساعة '+suppConf.time+'</div>';
+      else html += '<button class="confirm-btn" style="border-color:rgba(168,85,247,0.4);color:#a855f7;" onclick="hConfirmSupport(this.dataset.date)" data-date="'+dateStr+'">🆘 تم التنسيق مع الدعم</button>';
+      html += '</div>';
+    }
+
     showSection('🏢 Office', data.office, 'var(--accent2)', 'background:rgba(0,119,255,0.1);border:1px solid rgba(0,119,255,0.25);color:#60a5fa;border-radius:20px;padding:3px 10px;font-size:12px;');
     showSection('😴 Annual Leave', data.vacation, 'var(--warn)', 'background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.3);color:var(--warn);border-radius:20px;padding:3px 10px;font-size:12px;');
     showSection('🤒 Sick Leave', data.sick, 'var(--danger)', 'background:rgba(255,68,85,0.08);border:1px solid rgba(255,68,85,0.25);color:var(--danger);border-radius:20px;padding:3px 10px;font-size:12px;');
@@ -3258,7 +3596,7 @@
       // Set engineers & techs
       h_lists.eng  = [...(e.engineers||[])];
       h_lists.tech = [...(e.technicians||[])];
-      hRenderTags('eng'); hRenderTags('tech');
+      hRenderTags('eng'); hRenderTags('tech'); hRenderTags('support');
       // Set tasks
       document.getElementById('h_tasks_wrap').innerHTML = '';
       (e.tasks||[]).forEach(t => {
@@ -3295,6 +3633,36 @@
       await updateDoc(docRef, { entries, confirmations: newConf });
       toast('🗑 تم الحذف', 'success');
     } catch(err) { toast('Error: '+err.message,'error'); }
+  };
+
+
+  window.hEditSection = async function(dateStr, section) {
+    const snap = await getDoc(doc(db,'haraka',dateStr));
+    if (!snap.exists()) return;
+    const current = (snap.data()[section] || []).join('، ');
+    const newVal = prompt('عدّل الأسماء (افصل بـ ،):', current);
+    if (newVal === null) return;
+    const newList = newVal.split('،').map(n=>n.trim()).filter(Boolean);
+    try {
+      await updateDoc(doc(db,'haraka',dateStr), { [section]: newList });
+      toast('✅ تم التعديل','success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  window.hConfirmSupport = async function(dateStr) {
+    const name = currentUser ? currentUser.name : prompt('اسمك؟');
+    if (!name) return;
+    const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    try {
+      const docRef = doc(db,'haraka',dateStr);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) return;
+      const d = snap.data();
+      const confirmations = d.confirmations || {};
+      confirmations['support_0'] = { by: name, time: now };
+      await updateDoc(docRef, { confirmations });
+      toast('✅ تم تسجيل التنسيق مع الدعم','success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
   };
 
   window.hConfirmEngineer = async function(dateStr, entryIdx) {
@@ -3342,6 +3710,7 @@
       settingsStartListener();
       invStartListeners();
       tasksStartListener();
+      leavesStartListener();
       invCheckQRParam();
       if (!checkStoredLogin()) { document.getElementById('login_screen').style.display='flex'; document.getElementById('main_app').style.display='none'; }
       const hDateInp = document.getElementById('h_date');
