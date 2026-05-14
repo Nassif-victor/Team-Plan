@@ -856,16 +856,7 @@
   .req-card.declined { border-right-color:var(--danger); }
   .req-card.return_pending { border-right-color:var(--accent2); }
 
-  /* ── SWIPE TO DELETE ── */
-  .task-card-wrap { position:relative; overflow:hidden; border-radius:12px; margin-bottom:12px; }
-  .task-card-inner { transition:transform 0.3s ease; background:var(--card); }
-  .task-card-inner.swiped { transform:translateX(-80px); }
-  .task-delete-reveal {
-    position:absolute; right:0; top:0; bottom:0; width:80px;
-    background:var(--danger); display:flex; align-items:center; justify-content:center;
-    cursor:pointer; border-radius:0 12px 12px 0;
-  }
-  .task-delete-reveal span { color:#fff; font-size:12px; font-weight:700; }
+
 </style>
 </head>
 <body>
@@ -2804,9 +2795,7 @@
     });
     const saveBtn = document.querySelector('.btn-save-h');
     if (saveBtn) saveBtn.style.display = isAdminish ? '' : 'none';
-    // Hide date/search row for non-admin
-    const dateRow = document.querySelector('#panel-haraka > div[style*="align-items:center"]');
-    if (dateRow) dateRow.style.display = isAdminish ? '' : 'none';
+    // Date picker stays visible for ALL roles
 
     // Store flags globally
     window._showMissingTechs  = isAdminish;
@@ -3753,7 +3742,7 @@
 
     feed.innerHTML = list.map(t => `
       <div class="task-card-wrap" id="wrap_${t.id}">
-      ${window._isRole1 ? `<div class="task-delete-reveal" onclick="taskDelete('${t.id}')"><span style="font-size:20px;">🗑</span></div>` : ''}
+
       <div class="task-card-inner" id="card_${t.id}"
         ${window._isRole1 ? `
           ontouchstart="taskTouchStart(event,'${t.id}')"
