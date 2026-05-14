@@ -3863,7 +3863,19 @@
       const confirmed = confirmData[ei];
       html += '<div class="haraka-entry'+(needsCar&&!confirmed?' needs-confirm':'')+'">';
       html += '<div class="haraka-project-name">🏗️ '+esc(e.project)+(e.number?' <span class="haraka-project-num">'+esc(e.number)+'</span>':'')+' </div>';
-      html += '<div class="haraka-row">'+carIcon+' '+esc(e.car)+(e.carDetail?' — '+esc(e.carDetail):'')+' </div>';
+      const driverParts = e.carDetail ? e.carDetail.split(' — ') : [];
+      const driverPhone = driverParts.length > 1 ? driverParts[driverParts.length-1].trim() : '';
+      const driverName  = e.carDetail || '';
+      html += '<div class="haraka-row">'+carIcon+' '+esc(e.car);
+      if (e.carDetail) {
+        html += ' — '+esc(driverName);
+        if (driverPhone) {
+          html += ' <button onclick="navigator.clipboard.writeText(\'' + driverPhone.replace(/'/g,"\'") + '\').then(()=>toast(\'✅ تم نسخ الرقم\',\'success\'))" '
+               +  'title="نسخ رقم السواق" '
+               +  'style="background:rgba(0,194,255,0.1);border:1px solid rgba(0,194,255,0.25);color:var(--accent);border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;margin-right:4px;">📋</button>';
+        }
+      }
+      html += '</div>';
       if (e.engineers&&e.engineers.length) { html+='<div class="haraka-row">'; e.engineers.forEach(n=>{html+='<span class="haraka-person engineer">👨🏻‍💻 م '+esc(n)+'</span>';}); html+='</div>'; }
       if (e.technicians&&e.technicians.length) { html+='<div class="haraka-row">'; e.technicians.forEach(n=>{html+='<span class="haraka-person">👷🏻‍♂️ '+esc(n)+'</span>';}); html+='</div>'; }
       if (e.tasks&&e.tasks.length) { html+='<div class="haraka-tasks">'; e.tasks.forEach(t=>{html+='<div class="haraka-task"><span>▪️</span><span>'+esc(t)+'</span></div>';}); html+='</div>'; }
