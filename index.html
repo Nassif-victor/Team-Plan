@@ -2390,7 +2390,20 @@
       if (adminSec) adminSec.style.display = window._isAdminish ? '' : 'none';
     }
     if (name === 'settings') {
-      renderSettingsUsers();
+      const isRole1 = currentUser && currentUser.roles.includes(1);
+      const isRole2only = currentUser && currentUser.roles.some(r=>[2].includes(r)) && !isRole1;
+      // Show/hide sub-tab buttons
+      const techsBtn   = document.getElementById('settingsSubBtn_techs');
+      const usersBtn   = document.getElementById('settingsSubBtn_users');
+      if (techsBtn) techsBtn.style.display = isRole1 ? '' : 'none';
+      if (usersBtn) usersBtn.style.display = isRole1 ? '' : 'none';
+      // Role 2: go straight to drivers only
+      if (isRole2only) {
+        settingsSubTab('drivers');
+      } else {
+        settingsSubTab('techs');
+        renderSettingsUsers();
+      }
     }
   };
 
@@ -2804,7 +2817,7 @@
   // Tab permissions per role
   const ROLE_TABS = {
     1: ['projects','add','view','haraka','leaves','tasks','tools','inventory','settings'],
-    2: ['projects','add','view','haraka','leaves','tasks','tools','inventory'],
+    2: ['projects','add','view','haraka','leaves','tasks','tools','inventory','settings'],
     3: ['projects','add','view','haraka','leaves','tasks'],
     4: ['tools','haraka','inventory','leaves'],
     5: ['inventory','leaves'],
