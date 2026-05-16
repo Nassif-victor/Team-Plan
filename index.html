@@ -1307,11 +1307,24 @@
           <input type="text" id="h_coord" placeholder="م عبدالرحمن"></div>
         <div class="field"><label>🕐 وقت التحرك</label>
           <input type="text" id="h_depart" placeholder="8:30"></div>
+        <div class="field"><label>📅 من تاريخ</label>
+          <input type="date" id="h_date_from"></div>
+        <div class="field"><label>📅 إلى تاريخ</label>
+          <input type="date" id="h_date_to"></div>
       </div>
       <div class="field" style="margin-bottom:12px;">
-        <label>🆘 أسماء الدعم</label>
-        <div class="h-tags-box" id="h_support_wrap" onclick="document.getElementById('h_support_input').focus()">
-          <input class="h-bare-input" id="h_support_input" placeholder="اسم + Enter" onkeydown="hTagKey(event,'support')">
+        <label>🆘 الدعم</label>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <input type="text" id="h_support_name" placeholder="اسم + رقم" 
+            style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;direction:rtl;"
+            oninput="hSupportNameInput()">
+          <input type="text" id="h_support_phone" placeholder="01XXXXXXXXX"
+            style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;display:none;"
+            id="h_support_phone">
+          <button onclick="hAddSupport()" class="btn btn-ghost" style="padding:7px 12px;font-size:12px;">+ إضافة</button>
+        </div>
+        <div class="h-tags-box" id="h_support_wrap" style="min-height:32px;">
+          <input class="h-bare-input" id="h_support_input" style="display:none;">
         </div>
       </div>
       <div class="form-actions">
@@ -2655,25 +2668,31 @@
   }
 
   window.hAddEntry = function() {
-    const project = document.getElementById('h_project').value.trim();
-    const number  = document.getElementById('h_number').value.trim();
+    const project  = document.getElementById('h_project').value.trim();
+    const number   = document.getElementById('h_number').value.trim();
+    const dateFrom = document.getElementById('h_date_from') ? document.getElementById('h_date_from').value : '';
+    const dateTo   = document.getElementById('h_date_to') ? document.getElementById('h_date_to').value : '';
     if (!project && !number) { toast('اكتب اسم أو رقم المشروع', 'error'); return; }
+    const carDetailEl = document.getElementById('h_car_detail');
     h_pending.push({
       project, number,
       car: document.getElementById('h_car').value,
-      carDetail: document.getElementById('h_car_detail').value.trim(),
+      carDetail: carDetailEl ? carDetailEl.value : '',
       engineers: [...h_lists.eng], technicians: [...h_lists.tech],
       tasks: hGetTasks(),
       coord: document.getElementById('h_coord').value.trim(),
       depart: document.getElementById('h_depart').value.trim(),
+      support: [...(h_lists.support||[])],
+      dateFrom, dateTo,
     });
     hClearEntry(); hRenderPending(); toast('تمت الإضافة ✅', 'success');
   };
 
   window.hClearEntry = function() {
-    ['h_project','h_number','h_car_detail','h_coord','h_depart'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    ['h_project','h_number','h_car_detail','h_coord','h_depart','h_date_from','h_date_to','h_support_name','h_support_phone'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    const sp = document.getElementById('h_support_phone'); if(sp) sp.style.display='none';
     document.getElementById('h_car').selectedIndex = 0;
-    h_lists.eng = []; h_lists.tech = []; h_lists.support = [];
+    h_lists.eng = []; h_lists.tech = [];
     hRenderTags('eng'); hRenderTags('tech'); hRenderTags('support');
     document.getElementById('h_tasks_wrap').innerHTML = '';
   };
@@ -2710,12 +2729,40 @@
       const newSick     = h_lists.sick.length     ? [...h_lists.sick]     : (existing.sick     || []);
       const newSupport  = h_lists.support.length  ? [...h_lists.support]  : (existing.support  || []);
 
+      // Build entry date ranges - expand entries to multiple days
+      const getRange = (from, to) => {
+        if (!from) return [dateVal];
+        const days = []; const cur = new Date(from);
+        const end = to ? new Date(to) : new Date(from);
+        while (cur <= end) { days.push(cur.toISOString().split('T')[0]); cur.setDate(cur.getDate()+1); }
+        return days;
+      };
+
+      // Save to the selected date (main)
       await setDoc(docRef, {
         date:dateVal, publishedAt:Date.now(),
         entries: mergedEntries,
         confirmations: existingConf,
         office: newOffice, vacation: newVacation, sick: newSick, support: newSupport,
       });
+
+      // Also copy entries to their date ranges
+      for (const entry of h_pending) {
+        if (entry.dateFrom && entry.dateFrom !== dateVal) {
+          const days = getRange(entry.dateFrom, entry.dateTo);
+          for (const day of days) {
+            if (day === dateVal) continue;
+            const dayRef = doc(db,'haraka',day);
+            const daySnap = await getDoc(dayRef);
+            const dayData = daySnap.exists() ? daySnap.data() : { date:day, entries:[], office:[], vacation:[], sick:[], support:[] };
+            const dayEntries = dayData.entries || [];
+            // avoid duplicate
+            const exists = dayEntries.some(e=>e.project===entry.project && e.number===entry.number);
+            if (!exists) dayEntries.push(entry);
+            await setDoc(dayRef, { ...dayData, entries: dayEntries }, { merge: true });
+          }
+        }
+      }
       h_pending=[]; h_lists.office=[]; h_lists.vacation=[]; h_lists.sick=[]; h_lists.support=[];
       hRenderPending();
       ['office','vacation','sick','support'].forEach(t=>hRenderTags(t));
@@ -3915,7 +3962,17 @@
       html += '<div class="haraka-entry" style="border-right-color:#a855f7;">';
       html += '<div class="haraka-project-name">🆘 الدعم</div>';
       html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">';
-      data.support.forEach(n => { html += '<span style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#a855f7;border-radius:20px;padding:3px 10px;font-size:12px;">👤 '+esc(n)+'</span>'; });
+      data.support.forEach(val => {
+        const parts = val.split('||');
+        const sName = parts[0];
+        const sPhone = parts[1] || '';
+        html += '<span style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#a855f7;border-radius:20px;padding:3px 10px;font-size:12px;display:inline-flex;align-items:center;gap:4px;">👤 '+esc(sName);
+        if (sPhone) {
+          html += ' 📞 '+esc(sPhone);
+          html += ' <button onclick="navigator.clipboard.writeText(\'' + sPhone + '\').then(()=>toast(\'✅ تم نسخ الرقم\',\'success\'))" style="background:rgba(255,255,255,0.15);border:none;color:#a855f7;border-radius:4px;padding:1px 6px;font-size:10px;cursor:pointer;">📋</button>';
+        }
+        html += '</span>';
+      });
       html += '</div>';
       if (suppConf) html += '<div class="confirm-name" style="color:#a855f7;">✅ تم التنسيق مع الدعم بواسطة '+esc(suppConf.by)+' الساعة '+suppConf.time+'</div>';
       else html += '<button class="confirm-btn" style="border-color:rgba(168,85,247,0.4);color:#a855f7;" onclick="hConfirmSupport(this.dataset.date)" data-date="'+dateStr+'">🆘 تم التنسيق مع الدعم</button>';
@@ -4030,6 +4087,47 @@
       toast('✅ تم التعديل','success');
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
+
+
+  window.hSupportNameInput = function() {
+    const name = document.getElementById('h_support_name').value.trim();
+    const phoneField = document.getElementById('h_support_phone');
+    if (phoneField) phoneField.style.display = name ? 'block' : 'none';
+  };
+
+  window.hAddSupport = function() {
+    const name  = document.getElementById('h_support_name').value.trim();
+    const phone = document.getElementById('h_support_phone') ? document.getElementById('h_support_phone').value.trim() : '';
+    if (!name) return;
+    const val = phone ? name + '||' + phone : name;
+    if (!h_lists.support) h_lists.support = [];
+    h_lists.support.push(val);
+    document.getElementById('h_support_name').value = '';
+    const ph = document.getElementById('h_support_phone');
+    if (ph) { ph.value = ''; ph.style.display = 'none'; }
+    hRenderSupportTags();
+  };
+
+  function hRenderSupportTags() {
+    const wrap = document.getElementById('h_support_wrap');
+    if (!wrap) return;
+    const inp = document.getElementById('h_support_input');
+    wrap.innerHTML = '';
+    (h_lists.support||[]).forEach((val, i) => {
+      const parts = val.split('||');
+      const name  = parts[0];
+      const phone = parts[1] || '';
+      const tag = document.createElement('div');
+      tag.className = 'h-tag';
+      tag.innerHTML = '🆘 ' + name + (phone ? ' 📞 ' + phone : '');
+      const btn = document.createElement('button');
+      btn.textContent = '×';
+      btn.onclick = (()=>{ const idx=i; return ()=>{ h_lists.support.splice(idx,1); hRenderSupportTags(); }; })();
+      tag.appendChild(btn);
+      wrap.appendChild(tag);
+    });
+    if (inp) wrap.appendChild(inp);
+  }
 
   window.hConfirmSupport = async function(dateStr) {
     const name = currentUser ? currentUser.name : prompt('اسمك؟');
