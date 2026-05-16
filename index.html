@@ -2720,8 +2720,11 @@
   window.hRemovePending = function(i) { h_pending.splice(i,1); hRenderPending(); };
 
   window.hPublish = async function() {
-    const dateVal = document.getElementById('h_date').value;
-    if (!dateVal) { toast('اختار التاريخ أول', 'error'); return; }
+    // Use h_date_from as primary save date, fallback to h_date
+    const dateFrom = document.getElementById('h_date_from') ? document.getElementById('h_date_from').value : '';
+    const dateTo   = document.getElementById('h_date_to')   ? document.getElementById('h_date_to').value   : '';
+    const dateVal  = dateFrom || document.getElementById('h_date').value;
+    if (!dateVal) { toast('حدد تاريخ من/إلى أول', 'error'); return; }
     if (!h_pending.length && !h_lists.office.length && !h_lists.vacation.length && !h_lists.sick.length) {
       toast('مفيش حاجة تتحفظ', 'error'); return;
     }
@@ -2742,7 +2745,10 @@
       const newSick     = h_lists.sick.length     ? [...h_lists.sick]     : (existing.sick     || []);
       const newSupport  = h_lists.support.length  ? [...h_lists.support]  : (existing.support  || []);
 
-      // Build entry date ranges - expand entries to multiple days
+      // Use dateFrom/dateTo already parsed above
+      const globalFrom = dateFrom;
+      const globalTo   = dateTo;
+
       const getRange = (from, to) => {
         if (!from) return [dateVal];
         const days = []; const cur = new Date(from);
@@ -2751,30 +2757,27 @@
         return days;
       };
 
-      // Save to the selected date (main)
-      await setDoc(docRef, {
-        date:dateVal, publishedAt:Date.now(),
+      // Build full haraka payload
+      const harakaPayload = {
+        publishedAt: Date.now(),
         entries: mergedEntries,
         confirmations: existingConf,
         office: newOffice, vacation: newVacation, sick: newSick, support: newSupport,
-      });
+      };
 
-      // Also copy entries to their date ranges
-      for (const entry of h_pending) {
-        if (entry.dateFrom && entry.dateFrom !== dateVal) {
-          const days = getRange(entry.dateFrom, entry.dateTo);
-          for (const day of days) {
-            if (day === dateVal) continue;
-            const dayRef = doc(db,'haraka',day);
-            const daySnap = await getDoc(dayRef);
-            const dayData = daySnap.exists() ? daySnap.data() : { date:day, entries:[], office:[], vacation:[], sick:[], support:[] };
-            const dayEntries = dayData.entries || [];
-            // avoid duplicate
-            const exists = dayEntries.some(e=>e.project===entry.project && e.number===entry.number);
-            if (!exists) dayEntries.push(entry);
-            await setDoc(dayRef, { ...dayData, entries: dayEntries }, { merge: true });
-          }
+      // Save to the selected date (main)
+      await setDoc(docRef, { ...harakaPayload, date: dateVal });
+
+      // Save to ALL days in range (full copy)
+      if (globalFrom || mergedEntries.some(e => e.dateFrom)) {
+        const rangeFrom = globalFrom || dateVal;
+        const rangeTo   = globalTo   || dateVal;
+        const allDays   = getRange(rangeFrom, rangeTo);
+        for (const day of allDays) {
+          if (day === dateVal) continue; // already saved above
+          await setDoc(doc(db,'haraka',day), { ...harakaPayload, date: day });
         }
+        if (allDays.length > 1) toast('✅ تم الحفظ لـ ' + allDays.length + ' أيام!', 'success');
       }
       h_pending=[]; h_lists.office=[]; h_lists.vacation=[]; h_lists.sick=[]; h_lists.support=[];
       hRenderPending();
@@ -3941,6 +3944,24 @@
       if (e.tasks&&e.tasks.length) { html+='<div class="haraka-tasks">'; e.tasks.forEach(t=>{html+='<div class="haraka-task"><span>▪️</span><span>'+esc(t)+'</span></div>';}); html+='</div>'; }
       if (e.coord)  html+='<div class="haraka-row">📞 التنسيق مع '+esc(e.coord)+'</div>';
       if (e.depart) html+='<div class="haraka-row">🕐 التحرك الساعة '+esc(e.depart)+'</div>';
+      if (e.support && e.support.length) {
+        const suppConf = confirmData['support_'+ei];
+        html += '<div class="haraka-row" style="flex-wrap:wrap;gap:4px;">🆘 الدعم: ';
+        e.support.forEach(val => {
+          const parts = val.split('||');
+          const sName = parts[0]; const sPhone = parts[1]||'';
+          html += '<span style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#a855f7;border-radius:20px;padding:2px 8px;font-size:12px;display:inline-flex;align-items:center;gap:4px;">';
+          html += '👤 '+esc(sName);
+          if (sPhone) {
+            html += ' 📞 '+esc(sPhone);
+            html += ' <button onclick="navigator.clipboard.writeText(\'' + sPhone + '\').then(()=>toast(\'✅ تم نسخ الرقم\',\'success\'))" style="background:rgba(255,255,255,0.15);border:none;color:#a855f7;border-radius:4px;padding:1px 5px;font-size:10px;cursor:pointer;">📋</button>';
+          }
+          html += '</span>';
+        });
+        html += '</div>';
+        if (suppConf) html += '<div class="confirm-name" style="color:#a855f7;">✅ تم التنسيق مع الدعم بواسطة '+esc(suppConf.by)+' الساعة '+suppConf.time+'</div>';
+        else html += '<button class="confirm-btn" style="border-color:rgba(168,85,247,0.4);color:#a855f7;margin-top:6px;" onclick="hConfirmSupport(this.dataset.date,parseInt(this.dataset.idx))" data-date="'+dateStr+'" data-idx="'+ei+'">🆘 تم التنسيق مع الدعم</button>';
+      }
       if (needsCar) {
         if (confirmed) html+='<div class="confirm-name">✅ تم التنسيق بواسطة '+esc(confirmed.by)+' الساعة '+confirmed.time+'</div>';
         else html+='<button class="confirm-btn" onclick="hConfirmDriver(\'' + dateStr + '\','+ei+')">🚗 تم التنسيق مع السواق</button>';
@@ -3969,28 +3990,7 @@
       else html+='<div style="font-size:12px;color:var(--text3);">—</div>';
       html += '</div>';
     };
-    // Support coordination confirm
-    if (data.support && data.support.length) {
-      const suppConf = confirmData['support_0'];
-      html += '<div class="haraka-entry" style="border-right-color:#a855f7;">';
-      html += '<div class="haraka-project-name">🆘 الدعم</div>';
-      html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">';
-      data.support.forEach(val => {
-        const parts = val.split('||');
-        const sName = parts[0];
-        const sPhone = parts[1] || '';
-        html += '<span style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#a855f7;border-radius:20px;padding:3px 10px;font-size:12px;display:inline-flex;align-items:center;gap:4px;">👤 '+esc(sName);
-        if (sPhone) {
-          html += ' 📞 '+esc(sPhone);
-          html += ' <button onclick="navigator.clipboard.writeText(\'' + sPhone + '\').then(()=>toast(\'✅ تم نسخ الرقم\',\'success\'))" style="background:rgba(255,255,255,0.15);border:none;color:#a855f7;border-radius:4px;padding:1px 6px;font-size:10px;cursor:pointer;">📋</button>';
-        }
-        html += '</span>';
-      });
-      html += '</div>';
-      if (suppConf) html += '<div class="confirm-name" style="color:#a855f7;">✅ تم التنسيق مع الدعم بواسطة '+esc(suppConf.by)+' الساعة '+suppConf.time+'</div>';
-      else html += '<button class="confirm-btn" style="border-color:rgba(168,85,247,0.4);color:#a855f7;" onclick="hConfirmSupport(this.dataset.date)" data-date="'+dateStr+'">🆘 تم التنسيق مع الدعم</button>';
-      html += '</div>';
-    }
+    // Support confirm button moved inside entry - no separate section needed
 
     showSection('🏢 Office', data.office, 'var(--accent2)', 'background:rgba(0,119,255,0.1);border:1px solid rgba(0,119,255,0.25);color:#60a5fa;border-radius:20px;padding:3px 10px;font-size:12px;');
     showSection('😴 Annual Leave', data.vacation, 'var(--warn)', 'background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.3);color:var(--warn);border-radius:20px;padding:3px 10px;font-size:12px;');
@@ -4142,7 +4142,7 @@
     if (inp) wrap.appendChild(inp);
   }
 
-  window.hConfirmSupport = async function(dateStr) {
+  window.hConfirmSupport = async function(dateStr, entryIdx) {
     const name = currentUser ? currentUser.name : prompt('اسمك؟');
     if (!name) return;
     const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
@@ -4152,7 +4152,7 @@
       if (!snap.exists()) return;
       const d = snap.data();
       const confirmations = d.confirmations || {};
-      confirmations['support_0'] = { by: name, time: now };
+      confirmations['support_'+(entryIdx||0)] = { by: name, time: now };
       await updateDoc(docRef, { confirmations });
       toast('✅ تم تسجيل التنسيق مع الدعم','success');
     } catch(e) { toast('Error: '+e.message,'error'); }
