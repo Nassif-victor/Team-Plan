@@ -857,6 +857,78 @@
   .req-card.return_pending { border-right-color:var(--accent2); }
 
 
+
+  /* ── DASHBOARD ── */
+  .dash-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:20px; margin-bottom:16px;
+  }
+  .dash-card-title {
+    font-size:13px; font-weight:700; color:var(--text2);
+    text-transform:uppercase; letter-spacing:1px;
+    font-family:var(--mono); margin-bottom:16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .dash-stat-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 0; border-bottom:1px solid var(--border2);
+    font-size:14px;
+  }
+  .dash-stat-row:last-child { border-bottom:none; }
+  .dash-badge {
+    background:rgba(0,194,255,0.1); color:var(--accent);
+    border:1px solid rgba(0,194,255,0.2); border-radius:6px;
+    padding:2px 10px; font-size:12px; font-family:var(--mono); font-weight:600;
+  }
+  .dash-badge.warn { background:rgba(255,170,0,0.1); color:var(--warn); border-color:rgba(255,170,0,0.3); }
+  .dash-badge.success { background:rgba(0,229,160,0.1); color:var(--success); border-color:rgba(0,229,160,0.2); }
+  .dash-badge.danger { background:rgba(255,68,85,0.1); color:var(--danger); border-color:rgba(255,68,85,0.3); }
+  .dash-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+
+
+  /* ── NOTIFICATION BELL ── */
+  .notif-bell-wrap { position:relative; }
+  .notif-bell-btn {
+    background:transparent; border:none; cursor:pointer;
+    color:var(--text2); font-size:20px; padding:4px 8px;
+    position:relative; transition:color 0.2s;
+  }
+  .notif-bell-btn:hover { color:var(--text); }
+  .notif-badge {
+    position:absolute; top:0; right:0;
+    background:var(--danger); color:#fff;
+    border-radius:50%; width:17px; height:17px;
+    font-size:10px; font-weight:700; font-family:var(--mono);
+    display:flex; align-items:center; justify-content:center;
+    display:none;
+  }
+  .notif-panel {
+    position:absolute; top:48px; left:50%;
+    transform:translateX(-50%);
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; width:320px; max-height:420px;
+    overflow-y:auto; z-index:9999; display:none;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  }
+  .notif-panel.open { display:block; }
+  .notif-header {
+    padding:12px 16px; border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13px; font-weight:700; position:sticky; top:0;
+    background:var(--card); z-index:1;
+  }
+  .notif-item {
+    padding:12px 16px; border-bottom:1px solid var(--border2);
+    cursor:pointer; transition:background 0.15s; direction:rtl;
+  }
+  .notif-item:hover { background:var(--bg3); }
+  .notif-item.unread { border-right:3px solid var(--accent); }
+  .notif-item.unread { background:rgba(0,194,255,0.04); }
+  .notif-item-title { font-size:13px; font-weight:600; margin-bottom:3px; }
+  .notif-item-body  { font-size:12px; color:var(--text2); }
+  .notif-item-time  { font-size:11px; color:var(--text3); font-family:var(--mono); margin-top:4px; }
+  .notif-empty { padding:32px; text-align:center; color:var(--text3); font-size:13px; }
+
 </style>
 </head>
 <body>
@@ -915,13 +987,29 @@
       <span>☀️</span>
     </div>
     <div class="live-dot" id="liveStatus">Connecting...</div>
-      <span id="user_name_display" style="font-size:12px;color:var(--text2);font-family:var(--mono);"></span>
+      <div class="notif-bell-wrap" style="position:relative;">
+      <button class="notif-bell-btn" onclick="toggleNotifPanel()" title="Notifications">
+        🔔
+        <span class="notif-badge" id="notif_badge"></span>
+      </button>
+      <div class="notif-panel" id="notif_panel">
+        <div class="notif-header">
+          <span>🔔 Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--accent);font-size:11px;cursor:pointer;">Mark all read</button>
+        </div>
+        <div id="notif_list"><div class="notif-empty">No notifications</div></div>
+      </div>
+    </div>
+    <span id="user_name_display" style="font-size:12px;color:var(--text2);font-family:var(--mono);"></span>
       <button onclick="logout()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;">خروج</button>
   </div>
 </header>
 
 <!-- TABS BAR -->
 <div class="tabs-bar">
+  <button class="tab-btn" onclick="switchTab('dashboard')" id="tab-dashboard">
+    <span class="tab-icon">📊</span> Dashboard
+  </button>
   <button class="tab-btn" onclick="switchTab('projects')" id="tab-projects">
     <span class="tab-icon">🗂</span> Projects
   </button>
@@ -1515,6 +1603,10 @@
         style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
         🚗 السواقين
       </button>
+      <button onclick="settingsSubTab('profiles')" id="settingsSubBtn_profiles"
+        style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
+        👤 بيانات الموظفين
+      </button>
       <button onclick="settingsSubTab('users')" id="settingsSubBtn_users"
         style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
         👥 المستخدمين
@@ -1568,6 +1660,27 @@
       </div>
     </div><!-- /settings_section_drivers -->
 
+    <!-- SUB TAB: EMPLOYEE PROFILES -->
+    <div id="settings_section_profiles" style="display:none;">
+      <div class="settings-section">
+        <div class="settings-title">👤 بيانات الموظفين</div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:var(--bg3);">
+                <th style="padding:10px;text-align:right;border-bottom:1px solid var(--border);">الاسم</th>
+                <th style="padding:10px;text-align:center;border-bottom:1px solid var(--border);">تاريخ التعيين</th>
+                <th style="padding:10px;text-align:center;border-bottom:1px solid var(--border);">سنين الخبرة</th>
+                <th style="padding:10px;text-align:center;border-bottom:1px solid var(--border);">رصيد الإجازات</th>
+                <th style="padding:10px;text-align:center;border-bottom:1px solid var(--border);">حفظ</th>
+              </tr>
+            </thead>
+            <tbody id="profiles_tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- SUB TAB: USERS (role 1 only) -->
     <div id="settings_section_users" style="display:none;">
       <div class="settings-section" id="settings_users_section2">
@@ -1580,6 +1693,7 @@
                 <th style="padding:10px;text-align:right;border-bottom:1px solid var(--border);">Email</th>
                 <th style="padding:10px;text-align:right;border-bottom:1px solid var(--border);">Password</th>
                 <th style="padding:10px;text-align:right;border-bottom:1px solid var(--border);">Roles</th>
+                <th style="padding:10px;border-bottom:1px solid var(--border);"></th>
               </tr>
             </thead>
             <tbody id="settings_users_tbody2"></tbody>
@@ -1848,6 +1962,15 @@
     </div>
 
     <div id="requests_feed"></div>
+  </div>
+
+
+  <!-- ─── DASHBOARD TAB ─── -->
+  <div class="tab-panel" id="panel-dashboard">
+    <div class="section-title">📊 Dashboard</div>
+    <div id="dashboard_content">
+      <div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>
+    </div>
   </div>
 
 
@@ -2370,6 +2493,9 @@
       if (reqForm) reqForm.style.display = canSubmitReq ? '' : 'none';
       if (reqFilters) reqFilters.style.display = isRole1 ? 'flex' : 'none';
     }
+    if (name === 'dashboard') {
+      renderDashboard();
+    }
     if (name === 'leaves') {
       const nameInp = document.getElementById('leave_name');
       if (nameInp && currentUser) nameInp.value = currentUser.name;
@@ -2781,6 +2907,7 @@
           if (day === dateVal) continue; // already saved above
           await setDoc(doc(db,'haraka',day), { ...harakaPayload, date: day });
         }
+        // Edit log handled in hEditEntry
         if (allDays.length > 1) toast('✅ تم الحفظ لـ ' + allDays.length + ' أيام!', 'success');
       }
       h_pending=[]; h_lists.office=[]; h_lists.vacation=[]; h_lists.sick=[]; h_lists.support=[];
@@ -2824,11 +2951,11 @@
 
   // Tab permissions per role
   const ROLE_TABS = {
-    1: ['projects','add','view','haraka','leaves','tasks','tools','inventory','settings'],
-    2: ['projects','add','view','haraka','leaves','tasks','tools','inventory','settings'],
-    3: ['projects','add','view','haraka','leaves','tasks'],
-    4: ['tools','haraka','inventory','leaves'],
-    5: ['inventory','leaves'],
+    1: ['projects','add','view','haraka','leaves','tasks','tools','inventory','settings','dashboard'],
+    2: ['projects','add','view','haraka','leaves','tasks','tools','inventory','settings','dashboard'],
+    3: ['projects','add','view','haraka','leaves','tasks','dashboard'],
+    4: ['tools','haraka','inventory','leaves','dashboard'],
+    5: ['inventory','leaves','dashboard'],
   };
 
   // Tabs that show missing techs (role 1 & 2 only)
@@ -2889,6 +3016,7 @@
       return;
     }
     currentUser = { email, ...user };
+    window.currentUser = currentUser;
     localStorage.setItem('nt_user', JSON.stringify(currentUser));
     showApp();
   }
@@ -2897,8 +3025,10 @@
     document.getElementById('login_screen').style.display = 'none';
     document.getElementById('main_app').style.display = 'block';
     document.getElementById('user_name_display').textContent = currentUser.name;
-    applyRoles();
-  }
+    window.currentUser = currentUser;
+    window.applyRoles();
+    notifStartListener();
+  };
 
   window.checkStoredLogin = function() {
     const stored = localStorage.getItem('nt_user');
@@ -3152,6 +3282,7 @@
         qty, status:'return_pending',
         createdAt: Date.now(), type:'return'
       });
+      notifOnInvRequest(toolName, 'return');
       toast('🔄 تم إرسال طلب الإرجاع', 'success');
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
@@ -3191,6 +3322,7 @@
         </div>
         <div style="font-size:14px;font-weight:700;">🔧 ${esc(r.toolName)}</div>
         <div style="font-size:13px;color:var(--text2);">👤 ${esc(r.techName)} — الكمية: ${r.qty||1}</div>
+        ${window._isRole1 ? `<button onclick="invReqDelete('${r.id}')" style="margin-top:6px;background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🗑 حذف</button>` : ''}
         ${r.status==='pending' && window._canApproveInv ? `
           <div style="display:flex;gap:8px;margin-top:10px;">
             <button onclick="invApprove('${r.id}')" style="flex:1;background:rgba(0,229,160,0.15);border:1px solid var(--success);color:var(--success);border-radius:6px;padding:6px;font-size:12px;cursor:pointer;">✅ Approve</button>
@@ -3225,6 +3357,7 @@
         const avail = (toolSnap.data().available||0) - (req.qty||1);
         await updateDoc(toolRef, { available: Math.max(0,avail) });
       }
+      if (req) notifOnInvApproved(req);
       toast('✅ تمت الموافقة','success');
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
@@ -3310,7 +3443,7 @@
   // SETTINGS SUB-TABS
   // ══════════════════════════════════════
   window.settingsSubTab = function(tab) {
-    ['techs','drivers','users'].forEach(t => {
+    ['techs','drivers','profiles','users'].forEach(t => {
       const sec = document.getElementById('settings_section_'+t);
       const btn = document.getElementById('settingsSubBtn_'+t);
       if (sec) sec.style.display = t===tab ? '' : 'none';
@@ -3402,18 +3535,38 @@
   window.renderSettingsUsers = function() {
     const tbody = document.getElementById('settings_users_tbody') || document.getElementById('settings_users_tbody2');
     if (!tbody) return;
-    // Only show for role 1
     const section = document.getElementById('settings_users_section');
     if (section) section.style.display = currentUser && currentUser.roles.includes(1) ? '' : 'none';
     if (!currentUser || !currentUser.roles.includes(1)) return;
     tbody.innerHTML = Object.entries(USERS).map(([email, u]) => `
       <tr style="border-bottom:1px solid var(--border);">
-        <td style="padding:10px;">${u.name}</td>
+        <td style="padding:10px;direction:rtl;">${u.name}</td>
         <td style="padding:10px;font-family:var(--mono);font-size:12px;">${email}</td>
         <td style="padding:10px;font-family:var(--mono);font-size:12px;color:var(--warn);">${u.password}</td>
-        <td style="padding:10px;font-size:12px;">Role ${u.roles.join(', ')}</td>
+        <td style="padding:10px;font-size:12px;" id="roles_cell_${email.replace(/[@.]/g,'_')}">
+          <span id="roles_display_${email.replace(/[@.]/g,'_')}">Role ${u.roles.join(', ')}</span>
+        </td>
+        <td style="padding:10px;">
+          <button onclick="editRoles('${email}')"
+            style="background:transparent;border:1px solid rgba(0,194,255,0.3);color:var(--accent);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">✏️ Edit</button>
+        </td>
       </tr>
     `).join('');
+  };
+
+  window.editRoles = function(email) {
+    const u = USERS[email];
+    if (!u) return;
+    const current = u.roles.join(',');
+    const input = prompt('Roles for ' + u.name + ' (comma-separated, e.g. 1,3):', current);
+    if (!input || !input.trim()) return;
+    const newRoles = input.split(',').map(r => parseInt(r.trim())).filter(r => [1,2,3,4,5].includes(r));
+    if (!newRoles.length) { toast('Roles غلط — استخدم أرقام 1-5', 'error'); return; }
+    u.roles = newRoles;
+    // Update display
+    const display = document.getElementById('roles_display_' + email.replace(/[@.]/g,'_'));
+    if (display) display.textContent = 'Role ' + newRoles.join(', ');
+    toast('✅ تم تغيير roles لـ ' + u.name + ' — سيسري عند الدخول التالي', 'success');
   };
 
 
@@ -3486,6 +3639,7 @@
       ['task_title','task_desc','task_due'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('task_assignee').value='';
       document.getElementById('task_priority').selectedIndex=0;
+      notifOnTaskAssigned({ title }, assigneeEmail);
       toast('✅ Task assigned!', 'success');
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
@@ -3632,6 +3786,7 @@
         </div>
         ${r.adminReply ? `<div style="font-size:12px;color:var(--danger);padding:6px 10px;background:rgba(255,68,85,0.08);border-radius:6px;margin-bottom:8px;">💬 ${esc(r.adminReply)}</div>` : ''}
         ${r.decidedBy ? `<div style="font-size:11px;color:var(--text3);">بواسطة ${esc(r.decidedBy)}</div>` : ''}
+        ${window._isRole1 ? `<button onclick="reqDelete('${r.id}')" style="margin-top:8px;background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🗑 حذف</button>` : ''}
         ${(currentUser && currentUser.roles.includes(1)) && r.status==='pending' ? `
           <div style="display:flex;gap:8px;margin-top:12px;">
             <button onclick="reqApprove('${r.id}')" style="flex:1;background:rgba(0,229,160,0.15);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">✅ Approved</button>
@@ -3672,6 +3827,7 @@
         adminReply: '',
       });
       ['leave_from','leave_to','leave_notes'].forEach(id=>document.getElementById(id).value='');
+      notifOnLeaveRequest({ name: currentUser.name, email: currentUser.email, from, to });
       toast('✅ تم إرسال الطلب', 'success');
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
@@ -3685,11 +3841,39 @@
     leavesRenderFeed();
   };
 
+
+  window.leaveDelete = async function(id) {
+    if (!confirm('حذف هذا الطلب؟')) return;
+    await deleteDoc(doc(db,'leaves',id));
+    toast('🗑 تم الحذف','success');
+  };
+
+  window.reqDelete = async function(id) {
+    if (!confirm('حذف هذا الـ Request؟')) return;
+    await deleteDoc(doc(db,'req_approvals',id));
+    toast('🗑 تم الحذف','success');
+  };
+
+  window.invReqDelete = async function(id) {
+    if (!confirm('حذف هذا الطلب؟')) return;
+    await deleteDoc(doc(db,'inv_requests',id));
+    toast('🗑 تم الحذف','success');
+  };
+
   window.leaveApprove = async function(id) {
     const leave = leavesList.find(l=>l.id===id);
     if (!leave) return;
     try {
       await updateDoc(doc(db,'leaves',id), { status:'approved', decidedBy: currentUser.name, decidedAt: Date.now() });
+      // Deduct leave balance for annual/emergency leaves
+      if (leave.type === 'annual' || leave.type === 'emergency') {
+        const from = new Date(leave.from); const to = new Date(leave.to);
+        const days = Math.round((to - from) / (1000*60*60*24)) + 1;
+        const prof = profilesData[leave.email] || {};
+        const newBalance = Math.max(0, (prof.leaveBalance || 0) - days);
+        profilesData[leave.email] = { ...prof, leaveBalance: newBalance };
+        await setDoc(doc(db,'settings','profiles'), profilesData);
+      }
       // Auto-add to haraka vacation for each day in range
       const start = new Date(leave.from);
       const end   = new Date(leave.to);
@@ -3753,6 +3937,7 @@
             <button onclick="leaveApprove('${l.id}')" style="flex:1;background:rgba(0,229,160,0.15);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">✅ Approved</button>
             <button onclick="leaveReject('${l.id}')" style="flex:1;background:rgba(255,68,85,0.1);border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">❌ Rejected</button>
           </div>` : ''}
+        ${window._isRole1 ? `<button onclick="leaveDelete('${l.id}')" style="margin-top:8px;background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🗑 حذف</button>` : ''}
       </div>
     `).join('');
   }
@@ -3879,6 +4064,8 @@
       if (!snap.exists()) { toast('مفيش حركة محفوظة لهذا اليوم','error'); return; }
       const isBroadcast = snap.data().broadcasted;
       await updateDoc(docRef, { broadcasted: !isBroadcast });
+      if (!isBroadcast) notifOnBroadcast(dateVal);
+      if (!isBroadcast) notifOnBroadcast(dateVal);
       toast(!isBroadcast ? '📢 تم الذيع!' : '🔇 تم إيقاف الذيع', 'success');
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
@@ -3930,8 +4117,13 @@
       const carIcon = {مواصلات:'🚌',Sedan:'🚗',Van:'🚐',ايجار:'🚕'}[e.car]||'🚘';
       const needsCar = e.car !== 'مواصلات';
       const confirmed = confirmData[ei];
+      // Check if project is registered - if not, it's external support
+      const isExternal = e.project && !projectRegistry.some(p =>
+        p.name.trim().toLowerCase() === e.project.trim().toLowerCase() ||
+        p.number.trim().toLowerCase() === (e.number||'').trim().toLowerCase()
+      );
       html += '<div class="haraka-entry'+(needsCar&&!confirmed?' needs-confirm':'')+'">';
-      html += '<div class="haraka-project-name">🏗️ '+esc(e.project)+(e.number?' <span class="haraka-project-num">'+esc(e.number)+'</span>':'')+' </div>';
+      html += '<div class="haraka-project-name">🏗️ '+esc(e.project)+(e.number?' <span class="haraka-project-num">'+esc(e.number)+'</span>':'')+(isExternal?' <span style="background:rgba(255,170,0,0.1);color:var(--warn);border:1px solid rgba(255,170,0,0.3);border-radius:4px;font-size:11px;padding:1px 7px;">دعم خارجي</span>':'')+' </div>';
       const driverParts = e.carDetail ? e.carDetail.split(' — ') : [];
       const driverPhone = driverParts.length > 1 ? driverParts[driverParts.length-1].trim() : '';
       const driverName  = e.carDetail || '';
@@ -3969,8 +4161,8 @@
         else html += '<button class="confirm-btn" style="border-color:rgba(168,85,247,0.4);color:#a855f7;margin-top:6px;" onclick="hConfirmSupport(this.dataset.date,parseInt(this.dataset.idx))" data-date="'+dateStr+'" data-idx="'+ei+'">🆘 تم التنسيق مع الدعم</button>';
       }
       if (needsCar) {
-        if (confirmed) html+='<div class="confirm-name">✅ تم التنسيق بواسطة '+esc(confirmed.by)+' الساعة '+confirmed.time+'</div>';
-        else html+='<button class="confirm-btn" onclick="hConfirmDriver(\'' + dateStr + '\','+ei+')">🚗 تم التنسيق مع السواق</button>';
+        if (confirmed) html+='<div class="confirm-name" '+(isExternal ? 'style="color:var(--warn);background:rgba(255,170,0,0.08);border-color:rgba(255,170,0,0.2);"' : '')+'>'+(isExternal ? '🤝' : '✅')+' تم التنسيق بواسطة '+esc(confirmed.by)+' الساعة '+confirmed.time+'</div>';
+        else html+='<button class="confirm-btn" onclick="hConfirmDriver(\'' + dateStr + '\','+ei+')'+(isExternal ? ' style="border-color:rgba(255,170,0,0.4);color:var(--warn);"' : '')+'>'+(isExternal ? '🤝 تم التنسيق مع الفريق الآخر' : '🚗 تم التنسيق مع السواق')+'</button>';
       }
       if (e.engineers && e.engineers.length) {
         const engConf = confirmData['eng_'+ei];
@@ -4064,6 +4256,17 @@
       });
       // Delete the old entry first
       await window.hDeleteEntry(dateStr, entryIdx, true);
+      const _editName = currentUser ? currentUser.name : (window.currentUser ? window.currentUser.name : '?');
+      const _editProject = e.project || e.number || '?';
+      // Log edit immediately
+      try {
+        await addDoc(collection(db,'haraka_edits'), {
+          editedBy: _editName,
+          project: _editProject,
+          dateStr: dateStr,
+          editedAt: Date.now(),
+        });
+      } catch(logErr) { console.warn('Edit log error:', logErr); }
       toast('✏️ تم تحميل البيانات — عدّل وأضف للقائمة', 'success');
       // Scroll to top of haraka panel
       document.getElementById('panel-haraka').scrollTop = 0;
@@ -4196,6 +4399,431 @@
     } catch(err) { toast('Error: '+err.message,'error'); }
   };
 
+
+  // ══════════════════════════════════════
+  // EMPLOYEE PROFILES (leave balance + experience)
+  // ══════════════════════════════════════
+  let profilesData = {}; // { email: { leaveBalance, experience } }
+
+  function profilesStartListener() {
+    onSnapshot(doc(db, 'settings', 'profiles'), snap => {
+      profilesData = snap.exists() ? (snap.data() || {}) : {};
+      renderProfilesTable();
+      renderDashboard();
+    });
+  }
+
+  function calcExperience(joinDate) {
+    if (!joinDate) return 0;
+    const join = new Date(joinDate);
+    const now  = new Date();
+    const years = (now - join) / (1000 * 60 * 60 * 24 * 365.25);
+    return Math.floor(years * 10) / 10; // 1 decimal
+  }
+
+  function renderProfilesTable() {
+    const tbody = document.getElementById('profiles_tbody');
+    if (!tbody) return;
+    const users = Object.entries(USERS);
+    tbody.innerHTML = users.map(([email, u]) => {
+      const p   = profilesData[email] || {};
+      const exp = calcExperience(p.joinDate);
+      const key = email.replace(/[@.]/g,'_');
+      return `
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px;direction:rtl;font-weight:600;">${u.name}</td>
+          <td style="padding:10px;text-align:center;">
+            <input type="date" value="${p.joinDate||''}"
+              id="prof_join_${key}"
+              style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;">
+          </td>
+          <td style="padding:10px;text-align:center;">
+            <span class="dash-badge">${exp} سنة</span>
+          </td>
+          <td style="padding:10px;text-align:center;">
+            <input type="number" value="${p.leaveBalance||0}" min="0"
+              id="prof_leave_${key}"
+              style="width:65px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:13px;text-align:center;">
+          </td>
+          <td style="padding:10px;text-align:center;">
+            <button onclick="saveProfile('${email}')"
+              style="background:var(--accent2);border:none;color:#fff;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;">💾</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  window.saveProfile = async function(email) {
+    const key = email.replace(/[@.]/g,'_');
+    const joinDate     = document.getElementById('prof_join_'+key)?.value  || '';
+    const leaveBalance = parseInt(document.getElementById('prof_leave_'+key)?.value) || 0;
+    profilesData[email] = { joinDate, leaveBalance };
+    try {
+      await setDoc(doc(db,'settings','profiles'), profilesData);
+      toast('✅ تم الحفظ', 'success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
+  // ══════════════════════════════════════
+  // DASHBOARD
+  // ══════════════════════════════════════
+  function renderDashboard() {
+    const el = document.getElementById('dashboard_content');
+    if (!el || !currentUser) return;
+
+    const email = currentUser.email;
+    const name  = currentUser.name;
+    const prof  = profilesData[email] || {};
+
+    // Get tools assigned to this user
+    const myTools = invRequests.filter(r =>
+      r.techEmail === email && r.status === 'approved' && r.type === 'request'
+    );
+    // Minus returned
+    const myReturned = invRequests.filter(r =>
+      r.techEmail === email && r.status === 'returned' && r.type === 'return'
+    ).map(r => r.toolId);
+    const activeTools = myTools.filter(r => !myReturned.includes(r.toolId));
+
+    // Get pending leaves
+    const myPendingLeaves = leavesList.filter(l =>
+      l.email === email && l.status === 'pending'
+    );
+    const myApprovedLeaves = leavesList.filter(l =>
+      l.email === email && l.status === 'approved'
+    );
+
+    // Pending tasks
+    const myTasks = tasksList.filter(t =>
+      t.assigneeEmail === email && t.status === 'running'
+    );
+
+    el.innerHTML = `
+      <div class="dash-grid">
+
+        <!-- Personal Info -->
+        <div class="dash-card">
+          <div class="dash-card-title">👤 بياناتي</div>
+          <div class="dash-stat-row">
+            <span>الاسم</span>
+            <span style="font-weight:600;">${esc(name)}</span>
+          </div>
+          <div class="dash-stat-row">
+            <span>⏳ سنين الخبرة</span>
+            <span class="dash-badge">${calcExperience(prof.joinDate)} سنة</span>
+          </div>
+          <div class="dash-stat-row">
+            <span>🏖 رصيد الإجازات</span>
+            <span class="dash-badge success">${prof.leaveBalance || 0} يوم</span>
+          </div>
+        </div>
+
+        <!-- Tools -->
+        <div class="dash-card">
+          <div class="dash-card-title">🔧 العدة عندي</div>
+          ${activeTools.length ? activeTools.map(t => `
+            <div class="dash-stat-row">
+              <span>${esc(t.toolName)}</span>
+              <span class="dash-badge">${t.qty || 1} قطعة</span>
+            </div>
+          `).join('') : '<div style="color:var(--text3);font-size:13px;text-align:center;padding:12px;">مفيش عدة</div>'}
+        </div>
+
+        <!-- Leaves -->
+        <div class="dash-card">
+          <div class="dash-card-title">📅 الإجازات</div>
+          <div class="dash-stat-row">
+            <span>⏳ Pending</span>
+            <span class="dash-badge warn">${myPendingLeaves.length}</span>
+          </div>
+          <div class="dash-stat-row">
+            <span>✅ Approved</span>
+            <span class="dash-badge success">${myApprovedLeaves.length}</span>
+          </div>
+          ${myPendingLeaves.map(l => `
+            <div class="dash-stat-row" style="font-size:12px;">
+              <span style="color:var(--text2);">📌 ${l.from} → ${l.to}</span>
+              <span class="dash-badge warn">Pending</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Tasks -->
+        <div class="dash-card">
+          <div class="dash-card-title">✅ تاسكاتي الشغالة</div>
+          ${myTasks.length ? myTasks.map(t => `
+            <div class="dash-stat-row">
+              <span style="font-size:13px;">${esc(t.title)}</span>
+              <span class="dash-badge" style="background:rgba(0,119,255,0.1);color:var(--accent2);border-color:rgba(0,119,255,0.25);">Running</span>
+            </div>
+          `).join('') : '<div style="color:var(--text3);font-size:13px;text-align:center;padding:12px;">مفيش تاسكات شغالة</div>'}
+        </div>
+
+      </div>
+
+      ${currentUser && currentUser.roles.includes(1) ? `
+      <!-- Haraka Edits - Role 1 only -->
+      <div class="dash-card" style="grid-column:1/-1;">
+        <div class="dash-card-title">✏️ آخر 10 تعديلات على الحركة</div>
+        ${harakaEditsList.slice(0,10).length ? harakaEditsList.slice(0,10).map(e => `
+          <div class="dash-stat-row">
+            <div>
+              <span style="font-weight:600;">${esc(e.editedBy)}</span>
+              <span style="font-size:12px;color:var(--text3);margin-right:8px;">🏗️ ${esc(e.project)}</span>
+              <span style="font-size:12px;color:var(--text3);">📅 ${e.dateStr||''}</span>
+            </div>
+            <span class="dash-badge" style="font-size:11px;">${new Date(e.editedAt).toLocaleString('ar-EG',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+          </div>
+        `).join('') : '<div style="color:var(--text3);font-size:13px;text-align:center;padding:12px;">مفيش تعديلات</div>'}
+      </div>` : ''}
+
+    </div>
+    `;
+  }
+
+
+  // ══════════════════════════════════════
+  // NOTIFICATION SYSTEM
+  // ══════════════════════════════════════
+  let notifList = [];
+  let notifUnsubscribe = null;
+
+  // Who should receive each event type
+  const NOTIF_RULES = {
+    // Event type → { targetRoles: [], targetEmails: [] }
+    // targetRoles: all users with ANY of these roles get it
+    // targetEmail: specific user gets it
+  };
+
+  // Create a notification document in Firestore
+  async function createNotif({ title, body, targetRoles=[], targetEmails=[], icon='🔔' }) {
+    try {
+      await addDoc(collection(db,'notifications'), {
+        title, body, icon,
+        targetRoles, targetEmails,
+        createdAt: Date.now(),
+        readBy: [],
+      });
+    } catch(e) { console.warn('Notif error:', e); }
+  }
+
+  // Start listening to notifications for current user
+  function notifStartListener() {
+    if (notifUnsubscribe) notifUnsubscribe();
+    if (!currentUser) return;
+
+    const q = query(
+      collection(db,'notifications'),
+      orderBy('createdAt','desc')
+    );
+    notifUnsubscribe = onSnapshot(q, snap => {
+      notifList = [];
+      snap.forEach(d => {
+        const n = { id:d.id, ...d.data() };
+        // Check if this notif is for current user
+        const forMe = (
+          (n.targetRoles && n.targetRoles.some(r => currentUser.roles.includes(r))) ||
+          (n.targetEmails && n.targetEmails.includes(currentUser.email))
+        );
+        if (forMe) notifList.push(n);
+      });
+      renderNotifPanel();
+    });
+  }
+
+  function renderNotifPanel() {
+    const list = document.getElementById('notif_list');
+    const badge = document.getElementById('notif_badge');
+    if (!list) return;
+
+    const unread = notifList.filter(n => !(n.readBy||[]).includes(currentUser.email));
+    // Badge
+    if (badge) {
+      if (unread.length > 0) {
+        badge.style.display = 'flex';
+        badge.textContent = unread.length > 9 ? '9+' : unread.length;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    if (!notifList.length) {
+      list.innerHTML = '<div class="notif-empty">No notifications</div>';
+      return;
+    }
+
+    const timeAgo = (ts) => {
+      const diff = Date.now() - ts;
+      const m = Math.floor(diff/60000);
+      const h = Math.floor(m/60);
+      const d = Math.floor(h/24);
+      if (d > 0) return d + 'd ago';
+      if (h > 0) return h + 'h ago';
+      if (m > 0) return m + 'm ago';
+      return 'just now';
+    };
+
+    list.innerHTML = notifList.map(n => {
+      const isUnread = !(n.readBy||[]).includes(currentUser.email);
+      return `
+        <div class="notif-item ${isUnread?'unread':''}" onclick="markRead('${n.id}')">
+          <div class="notif-item-title">${n.icon||'🔔'} ${esc(n.title)}</div>
+          <div class="notif-item-body">${esc(n.body||'')}</div>
+          <div class="notif-item-time">${timeAgo(n.createdAt)}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.toggleNotifPanel = function() {
+    const panel = document.getElementById('notif_panel');
+    if (panel) panel.classList.toggle('open');
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', function closePanel(e) {
+        if (!e.target.closest('.notif-bell-wrap')) {
+          panel && panel.classList.remove('open');
+          document.removeEventListener('click', closePanel);
+        }
+      });
+    }, 10);
+  };
+
+  window.markRead = async function(id) {
+    if (!currentUser) return;
+    const n = notifList.find(x=>x.id===id);
+    if (!n) return;
+    const readBy = [...(n.readBy||[])];
+    if (!readBy.includes(currentUser.email)) {
+      readBy.push(currentUser.email);
+      await updateDoc(doc(db,'notifications',id), { readBy });
+    }
+  };
+
+  window.markAllRead = async function() {
+    if (!currentUser) return;
+    const promises = notifList
+      .filter(n => !(n.readBy||[]).includes(currentUser.email))
+      .map(n => {
+        const readBy = [...(n.readBy||[]), currentUser.email];
+        return updateDoc(doc(db,'notifications',n.id), { readBy });
+      });
+    await Promise.all(promises);
+    toast('✅ All read', 'success');
+  };
+
+  // ══════════════════════════════════════
+  // TRIGGER NOTIFICATIONS on each event
+  // ══════════════════════════════════════
+
+  // Called after hBroadcast (ذيع الحركة)
+  async function notifOnBroadcast(dateStr) {
+    await createNotif({
+      title: '📢 الحركة نزلت',
+      body: 'تم نشر حركة يوم ' + dateStr,
+      icon: '🚀',
+      targetRoles: [2,3,4,5],
+    });
+  }
+
+  // Called after leaveApprove
+  async function notifOnLeaveApproved(leave) {
+    await createNotif({
+      title: '✅ تمت الموافقة على إجازتك',
+      body: 'تمت الموافقة على إجازتك من ' + leave.from + ' إلى ' + leave.to,
+      icon: '🏖',
+      targetEmails: [leave.email],
+    });
+  }
+
+  // Called after leaveSubmit
+  async function notifOnLeaveRequest(leave) {
+    await createNotif({
+      title: '📋 طلب إجازة جديد',
+      body: leave.name + ' طلب إجازة من ' + leave.from + ' إلى ' + leave.to,
+      icon: '🏖',
+      targetRoles: [1,2],
+    });
+  }
+
+  // Called after reqApprove
+  async function notifOnReqApproved(req) {
+    await createNotif({
+      title: '✅ Request Approved',
+      body: 'تمت الموافقة على Request رقم ' + req.number,
+      icon: '📋',
+      targetEmails: [req.submittedByEmail],
+    });
+  }
+
+  // Called after reqReject
+  async function notifOnReqRejected(req) {
+    await createNotif({
+      title: '❌ Request Rejected',
+      body: 'تم رفض Request رقم ' + req.number,
+      icon: '📋',
+      targetEmails: [req.submittedByEmail],
+    });
+  }
+
+  // Called after taskAssign
+  async function notifOnTaskAssigned(task, assigneeEmail) {
+    await createNotif({
+      title: '✅ تاسك جديد ليك',
+      body: task.title,
+      icon: '📌',
+      targetEmails: [assigneeEmail],
+    });
+  }
+
+  // Called after invRequestTool / invReturnRequest
+  async function notifOnInvRequest(toolName, type) {
+    await createNotif({
+      title: type === 'request' ? '📤 طلب عدة جديد' : '🔄 طلب إرجاع عدة',
+      body: toolName,
+      icon: '📦',
+      targetRoles: [1,2,5],
+    });
+  }
+
+  // Called after invApprove
+  async function notifOnInvApproved(req) {
+    await createNotif({
+      title: '✅ تمت الموافقة على طلب العدة',
+      body: req.toolName + ' — الكمية: ' + (req.qty||1),
+      icon: '📦',
+      targetEmails: [req.techEmail],
+    });
+  }
+
+  // Called after hPublish (save الحركة by role 1/2/3)
+  async function notifOnHarakaPublish(dateStr) {
+    await createNotif({
+      title: '🚀 حركة جديدة',
+      body: 'تم حفظ حركة ' + dateStr,
+      icon: '🚀',
+      targetRoles: [1,2],
+    });
+  }
+
+
+  // ══════════════════════════════════════
+  // HARAKA EDITS LOG
+  // ══════════════════════════════════════
+  let harakaEditsList = [];
+
+  function harakaEditsStartListener() {
+    const q = query(collection(db,'haraka_edits'), orderBy('editedAt','desc'));
+    onSnapshot(q, snap => {
+      harakaEditsList = [];
+      snap.forEach(d => harakaEditsList.push({id:d.id,...d.data()}));
+      // Refresh dashboard if open
+      const panel = document.getElementById('panel-dashboard');
+      if (panel && panel.style.display !== 'none') renderDashboard();
+    });
+  }
+
   function initFirebase() {
     try {
       app = initializeApp(firebaseConfig);
@@ -4212,6 +4840,8 @@
       tasksStartListener();
       leavesStartListener();
       reqsStartListener();
+      profilesStartListener();
+      harakaEditsStartListener();
       invCheckQRParam();
       if (!checkStoredLogin()) { document.getElementById('login_screen').style.display='flex'; document.getElementById('main_app').style.display='none'; }
       const hDateInp = document.getElementById('h_date');
