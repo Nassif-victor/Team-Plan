@@ -4176,10 +4176,12 @@
         if (engConf) html+='<div class="confirm-name" style="color:var(--accent2);background:rgba(0,119,255,0.06);border:1px solid rgba(0,119,255,0.2);">✅ تم التنسيق مع المهندس بواسطة '+esc(engConf.by)+' الساعة '+engConf.time+'</div>';
         else html+='<button class="confirm-btn" style="border-color:rgba(0,119,255,0.4);color:var(--accent2);" onclick="hConfirmEngineer(this.dataset.date,parseInt(this.dataset.idx))" data-date="'+dateStr+'" data-idx="'+ei+'">👨🏻‍💻 تم التنسيق مع المهندس</button>';
       }
+      if (currentUser && currentUser.roles && currentUser.roles.some(r => r === 1 || r === 2)) {
       html += '<div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-start;">';
       html += '<button onclick="hEditEntry(\''+dateStr+'\','+ei+')" style="background:transparent;border:1px solid rgba(0,194,255,0.3);color:var(--accent);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">✏️ تعديل</button>';
       html += '<button onclick="hDeleteEntry(this.getAttribute(\'data-d\'),parseInt(this.getAttribute(\'data-i\')))" data-d="'+dateStr+'" data-i="'+ei+'" style="background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🗑 حذف</button>';
       html += '</div>';
+      }
       html += '</div><hr style="border:none;border-top:1px solid var(--border);margin:0;">';
     });
 
