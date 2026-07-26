@@ -4160,11 +4160,18 @@
         if (suppConf) html += '<div class="confirm-name" style="color:#a855f7;">✅ تم التنسيق مع الدعم بواسطة '+esc(suppConf.by)+' الساعة '+suppConf.time+'</div>';
         else html += '<button class="confirm-btn" style="border-color:rgba(168,85,247,0.4);color:#a855f7;margin-top:6px;" onclick="hConfirmSupport(this.dataset.date,parseInt(this.dataset.idx))" data-date="'+dateStr+'" data-idx="'+ei+'">🆘 تم التنسيق مع الدعم</button>';
       }
-      if (needsCar) {
-        if (confirmed) html+='<div class="confirm-name" '+(isExternal ? 'style="color:var(--warn);background:rgba(255,170,0,0.08);border-color:rgba(255,170,0,0.2);"' : '')+'>'+(isExternal ? '🤝' : '✅')+' تم التنسيق بواسطة '+esc(confirmed.by)+' الساعة '+confirmed.time+'</div>';
-        else html+='<button class="confirm-btn" onclick="hConfirmDriver(\'' + dateStr + '\','+ei+')'+(isExternal ? ' style="border-color:rgba(255,170,0,0.4);color:var(--warn);"' : '')+'>'+(isExternal ? '🤝 تم التنسيق مع الفريق الآخر' : '🚗 تم التنسيق مع السواق')+'</button>';
+      // CASE 1: External support → تم التنسيق مع الفريق الآخر
+      if (isExternal) {
+        if (confirmed) html+='<div class="confirm-name" style="color:var(--warn);background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.2);">🤝 تم التنسيق مع الفريق الآخر بواسطة '+esc(confirmed.by)+' الساعة '+confirmed.time+'</div>';
+        else html+='<button class="confirm-btn" style="border-color:rgba(255,170,0,0.4);color:var(--warn);" onclick="hConfirmDriver(this.dataset.date,parseInt(this.dataset.idx))" data-date="'+dateStr+'" data-idx="'+ei+'">🤝 تم التنسيق مع الفريق الآخر</button>';
       }
-      if (e.engineers && e.engineers.length) {
+      // CASE 2: Car (not مواصلات, not external) → تم التنسيق مع السواق
+      if (needsCar && !isExternal) {
+        if (confirmed) html+='<div class="confirm-name">✅ تم التنسيق مع السواق بواسطة '+esc(confirmed.by)+' الساعة '+confirmed.time+'</div>';
+        else html+='<button class="confirm-btn" onclick="hConfirmDriver(this.dataset.date,parseInt(this.dataset.idx))" data-date="'+dateStr+'" data-idx="'+ei+'">🚗 تم التنسيق مع السواق</button>';
+      }
+      // CASE 3: Always show engineer confirm
+      {
         const engConf = confirmData['eng_'+ei];
         if (engConf) html+='<div class="confirm-name" style="color:var(--accent2);background:rgba(0,119,255,0.06);border:1px solid rgba(0,119,255,0.2);">✅ تم التنسيق مع المهندس بواسطة '+esc(engConf.by)+' الساعة '+engConf.time+'</div>';
         else html+='<button class="confirm-btn" style="border-color:rgba(0,119,255,0.4);color:var(--accent2);" onclick="hConfirmEngineer(this.dataset.date,parseInt(this.dataset.idx))" data-date="'+dateStr+'" data-idx="'+ei+'">👨🏻‍💻 تم التنسيق مع المهندس</button>';
@@ -4811,13 +4818,15 @@
   // ══════════════════════════════════════
   // HARAKA EDITS LOG
   // ══════════════════════════════════════
-  let harakaEditsList = [];
+  window.harakaEditsList = [];
+  let harakaEditsList = window.harakaEditsList;
 
   function harakaEditsStartListener() {
     const q = query(collection(db,'haraka_edits'), orderBy('editedAt','desc'));
     onSnapshot(q, snap => {
       harakaEditsList = [];
-      snap.forEach(d => harakaEditsList.push({id:d.id,...d.data()}));
+      window.harakaEditsList = [];
+      snap.forEach(d => { const item={id:d.id,...d.data()}; harakaEditsList.push(item); window.harakaEditsList.push(item); });
       // Refresh dashboard if open
       const panel = document.getElementById('panel-dashboard');
       if (panel && panel.style.display !== 'none') renderDashboard();
