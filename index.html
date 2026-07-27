@@ -929,6 +929,44 @@
   .notif-item-time  { font-size:11px; color:var(--text3); font-family:var(--mono); margin-top:4px; }
   .notif-empty { padding:32px; text-align:center; color:var(--text3); font-size:13px; }
 
+
+  /* ── PERMISSION MATRIX ── */
+  .perm-matrix-wrap { overflow-x:auto; margin-top:8px; }
+  .perm-matrix { border-collapse:collapse; font-size:11px; min-width:100%; }
+  .perm-matrix th { 
+    background:var(--bg3); padding:8px 10px; text-align:center;
+    font-weight:600; color:var(--text2); border:1px solid var(--border);
+    white-space:nowrap; position:sticky; top:0; z-index:2;
+    min-width:80px;
+  }
+  .perm-matrix th.user-col {
+    text-align:right; direction:rtl; min-width:100px;
+    position:sticky; left:0; z-index:3; background:var(--bg3);
+  }
+  .perm-matrix td {
+    padding:6px; border:1px solid var(--border2);
+    text-align:center; vertical-align:middle;
+  }
+  .perm-matrix td.user-name {
+    text-align:right; direction:rtl; font-weight:600;
+    background:var(--bg3); position:sticky; left:0; z-index:1;
+    font-size:12px; padding:6px 10px; white-space:nowrap;
+  }
+  .perm-toggle {
+    width:28px; height:28px; border-radius:6px; border:none; cursor:pointer;
+    font-size:14px; transition:all 0.15s; display:inline-flex;
+    align-items:center; justify-content:center;
+  }
+  .perm-toggle.on  { background:rgba(0,229,160,0.2); color:var(--success); border:1.5px solid var(--success); }
+  .perm-toggle.off { background:var(--bg3); color:var(--text3); border:1.5px solid var(--border2); }
+  .perm-toggle.on:hover  { background:rgba(0,229,160,0.35); }
+  .perm-toggle.off:hover { background:var(--bg); color:var(--text2); }
+  .perm-section-header { 
+    background:rgba(0,194,255,0.06); color:var(--accent);
+    font-size:10px; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.5px; padding:4px 6px;
+  }
+
 </style>
 </head>
 <body>
@@ -1607,6 +1645,10 @@
         style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
         👤 بيانات الموظفين
       </button>
+      <button onclick="settingsSubTab('matrix')" id="settingsSubBtn_matrix"
+        style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
+        🔐 Permissions
+      </button>
       <button onclick="settingsSubTab('users')" id="settingsSubBtn_users"
         style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
         👥 المستخدمين
@@ -1676,6 +1718,21 @@
               </tr>
             </thead>
             <tbody id="profiles_tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- SUB TAB: PERMISSIONS MATRIX -->
+    <div id="settings_section_matrix" style="display:none;">
+      <div class="settings-section">
+        <div class="settings-title">🔐 Permission Matrix</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">🟢 = مفعّل &nbsp; ⬜ = مش مفعّل &nbsp; — دوس على أي خانة عشان تغيّر</p>
+        <div class="perm-matrix-wrap">
+          <table class="perm-matrix" id="perm_matrix_table">
+            <thead id="perm_matrix_head"></thead>
+            <tbody id="perm_matrix_body"></tbody>
           </table>
         </div>
       </div>
@@ -3028,6 +3085,7 @@
     window.currentUser = currentUser;
     window.applyRoles();
     notifStartListener();
+    permStartListener();
   };
 
   window.checkStoredLogin = function() {
@@ -3213,7 +3271,7 @@
     const grid = document.getElementById('inv_tools_grid');
     if (!grid) return;
     if (!invTools.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>مفيش عدة متسجلة</p></div>'; return; }
-    const isAdmin = window._isRole1;
+    const isAdmin = hasPerm('inv_add') || hasPerm('inv_edit_qty');
     const canApprove = window._canApproveInv;
     grid.innerHTML = '';
     invTools.forEach(t => {
@@ -3323,12 +3381,12 @@
         <div style="font-size:14px;font-weight:700;">🔧 ${esc(r.toolName)}</div>
         <div style="font-size:13px;color:var(--text2);">👤 ${esc(r.techName)} — الكمية: ${r.qty||1}</div>
         ${window._isRole1 ? `<button onclick="invReqDelete('${r.id}')" style="margin-top:6px;background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🗑 حذف</button>` : ''}
-        ${r.status==='pending' && window._canApproveInv ? `
+        ${r.status==='pending' && hasPerm('inv_approve') ? `
           <div style="display:flex;gap:8px;margin-top:10px;">
             <button onclick="invApprove('${r.id}')" style="flex:1;background:rgba(0,229,160,0.15);border:1px solid var(--success);color:var(--success);border-radius:6px;padding:6px;font-size:12px;cursor:pointer;">✅ Approve</button>
             <button onclick="invDecline('${r.id}')" style="flex:1;background:rgba(255,68,85,0.1);border:1px solid var(--danger);color:var(--danger);border-radius:6px;padding:6px;font-size:12px;cursor:pointer;">❌ Decline</button>
           </div>` : ''}
-        ${r.status==='return_pending' && window._canApproveInv ? `
+        ${r.status==='return_pending' && hasPerm('inv_approve') ? `
           <div style="display:flex;gap:8px;margin-top:10px;">
             <button onclick="invApproveReturn('${r.id}')" style="flex:1;background:rgba(0,194,255,0.1);border:1px solid var(--accent);color:var(--accent);border-radius:6px;padding:6px;font-size:12px;cursor:pointer;">✅ تأكيد الإرجاع</button>
           </div>` : ''}
@@ -3443,7 +3501,7 @@
   // SETTINGS SUB-TABS
   // ══════════════════════════════════════
   window.settingsSubTab = function(tab) {
-    ['techs','drivers','profiles','users'].forEach(t => {
+    ['techs','drivers','profiles','matrix','users'].forEach(t => {
       const sec = document.getElementById('settings_section_'+t);
       const btn = document.getElementById('settingsSubBtn_'+t);
       if (sec) sec.style.display = t===tab ? '' : 'none';
@@ -3455,6 +3513,7 @@
     });
     if (tab === 'users') renderSettingsUsers();
     if (tab === 'drivers') renderDriversList();
+    if (tab === 'matrix') renderPermMatrix();
     if (tab === 'techs') {
       // Move users table into techs sub-tab if role 1
       const usersSection = document.getElementById('settings_users_section');
@@ -3787,7 +3846,7 @@
         ${r.adminReply ? `<div style="font-size:12px;color:var(--danger);padding:6px 10px;background:rgba(255,68,85,0.08);border-radius:6px;margin-bottom:8px;">💬 ${esc(r.adminReply)}</div>` : ''}
         ${r.decidedBy ? `<div style="font-size:11px;color:var(--text3);">بواسطة ${esc(r.decidedBy)}</div>` : ''}
         ${window._isRole1 ? `<button onclick="reqDelete('${r.id}')" style="margin-top:8px;background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🗑 حذف</button>` : ''}
-        ${(currentUser && currentUser.roles.includes(1)) && r.status==='pending' ? `
+        ${hasPerm('task_req_approve') && r.status==='pending' ? `
           <div style="display:flex;gap:8px;margin-top:12px;">
             <button onclick="reqApprove('${r.id}')" style="flex:1;background:rgba(0,229,160,0.15);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">✅ Approved</button>
             <button onclick="reqReject('${r.id}')" style="flex:1;background:rgba(255,68,85,0.1);border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">❌ Rejected</button>
@@ -3932,7 +3991,7 @@
         ${l.notes ? `<div style="font-size:12px;color:var(--text3);margin-bottom:8px;">📝 ${esc(l.notes)}</div>` : ''}
         ${l.adminReply ? `<div style="font-size:12px;color:var(--danger);margin-bottom:8px;padding:6px 10px;background:rgba(255,68,85,0.08);border-radius:6px;">💬 ${esc(l.adminReply)}</div>` : ''}
         ${l.decidedBy ? `<div style="font-size:11px;color:var(--text3);">بواسطة ${esc(l.decidedBy)}</div>` : ''}
-        ${isAdmin && l.status==='pending' ? `
+        ${(currentUser && hasPerm('leave_approve')) && l.status==='pending' ? `
           <div style="display:flex;gap:8px;margin-top:12px;">
             <button onclick="leaveApprove('${l.id}')" style="flex:1;background:rgba(0,229,160,0.15);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">✅ Approved</button>
             <button onclick="leaveReject('${l.id}')" style="flex:1;background:rgba(255,68,85,0.1);border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">❌ Rejected</button>
@@ -4176,9 +4235,9 @@
         if (engConf) html+='<div class="confirm-name" style="color:var(--accent2);background:rgba(0,119,255,0.06);border:1px solid rgba(0,119,255,0.2);">✅ تم التنسيق مع المهندس بواسطة '+esc(engConf.by)+' الساعة '+engConf.time+'</div>';
         else html+='<button class="confirm-btn" style="border-color:rgba(0,119,255,0.4);color:var(--accent2);" onclick="hConfirmEngineer(this.dataset.date,parseInt(this.dataset.idx))" data-date="'+dateStr+'" data-idx="'+ei+'">👨🏻‍💻 تم التنسيق مع المهندس</button>';
       }
-      if (currentUser && currentUser.roles && currentUser.roles.some(r => r === 1 || r === 2)) {
+      if (hasPerm('haraka_edit') || hasPerm('haraka_delete')) {
       html += '<div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-start;">';
-      html += '<button onclick="hEditEntry(\''+dateStr+'\','+ei+')" style="background:transparent;border:1px solid rgba(0,194,255,0.3);color:var(--accent);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">✏️ تعديل</button>';
+      if (hasPerm('haraka_edit')) html += '<button onclick="hEditEntry(\''+dateStr+'\','+ei+')" style="background:transparent;border:1px solid rgba(0,194,255,0.3);color:var(--accent);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">✏️ تعديل</button>';
       html += '<button onclick="hDeleteEntry(this.getAttribute(\'data-d\'),parseInt(this.getAttribute(\'data-i\')))" data-d="'+dateStr+'" data-i="'+ei+'" style="background:transparent;border:1px solid rgba(255,68,85,0.3);color:var(--danger);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🗑 حذف</button>';
       html += '</div>';
       }
@@ -4834,6 +4893,195 @@
       if (panel && panel.style.display !== 'none') renderDashboard();
     });
   }
+
+
+  // ══════════════════════════════════════
+  // PERMISSION MATRIX SYSTEM
+  // ══════════════════════════════════════
+
+  // Define all features
+  const PERM_FEATURES = [
+    // Tabs
+    { id:'tab_dashboard',    label:'📊 Dashboard',         group:'Tabs' },
+    { id:'tab_projects',     label:'📁 Projects',           group:'Tabs' },
+    { id:'tab_add',          label:'➕ Add/Edit',            group:'Tabs' },
+    { id:'tab_view',         label:'◎ View Projects',       group:'Tabs' },
+    { id:'tab_haraka',       label:'🚀 الحركة',              group:'Tabs' },
+    { id:'tab_inventory',    label:'📦 العدة',               group:'Tabs' },
+    { id:'tab_tools',        label:'🔧 عدة تالفة',           group:'Tabs' },
+    { id:'tab_leaves',       label:'🏖 طلب إجازة',           group:'Tabs' },
+    { id:'tab_tasks',        label:'✅ Task Assignment',     group:'Tabs' },
+    { id:'tab_settings',     label:'⚙️ Settings',            group:'Tabs' },
+    // الحركة Actions
+    { id:'haraka_save',      label:'💾 Save الحركة',         group:'الحركة' },
+    { id:'haraka_broadcast', label:'📢 ذيع الحركة',          group:'الحركة' },
+    { id:'haraka_edit',      label:'✏️ Edit في الحركة',      group:'الحركة' },
+    { id:'haraka_delete',    label:'🗑 Delete في الحركة',    group:'الحركة' },
+    // العدة Actions
+    { id:'inv_add',          label:'➕ إضافة عدة',           group:'العدة' },
+    { id:'inv_edit_qty',     label:'✏️ تعديل كمية',          group:'العدة' },
+    { id:'inv_approve',      label:'✅ Approve طلب عدة',     group:'العدة' },
+    { id:'inv_request',      label:'📤 طلب عدة',             group:'العدة' },
+    // Tasks
+    { id:'task_assign',      label:'📌 Assign Task',         group:'Tasks' },
+    { id:'task_req_submit',  label:'📋 Submit Request',      group:'Tasks' },
+    { id:'task_req_approve', label:'✅ Approve Request',     group:'Tasks' },
+    // إجازة
+    { id:'leave_approve',    label:'✅ Approve إجازة',       group:'إجازة' },
+  ];
+
+  let permData = {}; // { email: { feature_id: true/false } }
+
+  // Default permissions based on roles (fallback)
+  function getDefaultPerms(roles) {
+    const p = {};
+    const isRole1 = roles.includes(1);
+    const isRole2 = roles.includes(2);
+    const isRole3 = roles.includes(3);
+    const isRole4 = roles.includes(4);
+    const isRole5 = roles.includes(5);
+    const isAdmin = isRole1 || isRole2;
+
+    p.tab_dashboard    = true;
+    p.tab_projects     = isAdmin || isRole3;
+    p.tab_add          = isAdmin || isRole3;
+    p.tab_view         = isAdmin || isRole3;
+    p.tab_haraka       = true;
+    p.tab_inventory    = isAdmin || isRole4 || isRole5;
+    p.tab_tools        = isAdmin || isRole4;
+    p.tab_leaves       = true;
+    p.tab_tasks        = isAdmin || isRole3;
+    p.tab_settings     = isRole1 || isRole2;
+    p.haraka_save      = isAdmin;
+    p.haraka_broadcast = isAdmin;
+    p.haraka_edit      = isAdmin;
+    p.haraka_delete    = isAdmin;
+    p.inv_add          = isRole1;
+    p.inv_edit_qty     = isRole1;
+    p.inv_approve      = isAdmin || isRole5;
+    p.inv_request      = isRole4;
+    p.task_assign      = isRole1;
+    p.task_req_submit  = isRole3;
+    p.task_req_approve = isRole1;
+    p.leave_approve    = isAdmin;
+    return p;
+  }
+
+  // Check if current user has a permission
+  function hasPerm(featureId) {
+    if (!currentUser) return false;
+    const userPerms = permData[currentUser.email];
+    if (!userPerms || userPerms[featureId] === undefined) {
+      // Fallback to defaults
+      const defaults = getDefaultPerms(currentUser.roles);
+      return defaults[featureId] !== false;
+    }
+    return userPerms[featureId] === true;
+  }
+
+  function permStartListener() {
+    onSnapshot(doc(db,'settings','permissions'), snap => {
+      permData = snap.exists() ? (snap.data() || {}) : {};
+      applyPermissions();
+    });
+  }
+
+  function applyPermissions() {
+    if (!currentUser) return;
+    // Re-render haraka feed if it's showing (to update edit/delete buttons)
+    const hDate = document.getElementById('h_date');
+    if (hDate && hDate.value) {
+      const panel = document.getElementById('panel-haraka');
+      if (panel && panel.style.display !== 'none') hLoadDay(hDate.value);
+    }
+    // Apply tab visibility
+    const tabMap = {
+      tab_dashboard: 'dashboard', tab_projects: 'projects',
+      tab_add: 'add', tab_view: 'view', tab_haraka: 'haraka',
+      tab_inventory: 'inventory', tab_tools: 'tools',
+      tab_leaves: 'leaves', tab_tasks: 'tasks', tab_settings: 'settings'
+    };
+    Object.entries(tabMap).forEach(([feat, tabId]) => {
+      const btn = document.getElementById('tab-'+tabId);
+      if (btn) btn.style.display = hasPerm(feat) ? '' : 'none';
+    });
+    // Show/hide save & broadcast buttons in haraka
+    const saveBtn = document.querySelector('.btn-save-h');
+    if (saveBtn) saveBtn.style.display = hasPerm('haraka_save') ? '' : 'none';
+    const bcWrap = document.getElementById('h_broadcast_wrap');
+    if (bcWrap) bcWrap.style.display = hasPerm('haraka_broadcast') ? '' : 'none';
+    // Show/hide inv add form
+    const invAdmin = document.getElementById('inv_admin_section');
+    if (invAdmin) invAdmin.style.display = hasPerm('inv_add') ? '' : 'none';
+    // Show/hide task assign form
+    const taskForm = document.getElementById('task_assign_form');
+    if (taskForm) taskForm.style.display = hasPerm('task_assign') ? '' : 'none';
+    // Show/hide req submit form
+    const reqForm = document.getElementById('req_submit_form');
+    if (reqForm) reqForm.style.display = hasPerm('task_req_submit') ? '' : 'none';
+    const reqFilters = document.getElementById('req_admin_filters');
+    if (reqFilters) reqFilters.style.display = hasPerm('task_req_approve') ? 'flex' : 'none';
+    // Leave approve buttons handled in leavesRenderFeed
+    // Inv approve handled in invRenderRequests
+    // haraka edit/delete handled in hRenderFeed via hasPerm()
+  }
+
+  // Render the matrix table
+  function renderPermMatrix() {
+    const thead = document.getElementById('perm_matrix_head');
+    const tbody = document.getElementById('perm_matrix_body');
+    if (!thead || !tbody) return;
+
+    const users = Object.entries(USERS);
+    const groups = [...new Set(PERM_FEATURES.map(f => f.group))];
+
+    // Build header: user names
+    thead.innerHTML = `<tr>
+      <th class="user-col">Feature</th>
+      ${users.map(([email, u]) => `<th title="${email}" style="min-width:80px;">${u.name.split(' ')[0]}<br><span style='font-size:9px;color:var(--text3);font-weight:400;'>${u.name.split(' ').slice(1).join(' ')}</span></th>`).join('')}
+    </tr>`;
+
+    // Build body: grouped features
+    let rows = '';
+    groups.forEach(group => {
+      rows += `<tr><td class="perm-section-header" colspan="${users.length+1}">${group}</td></tr>`;
+      PERM_FEATURES.filter(f => f.group === group).forEach(feat => {
+        rows += `<tr>
+          <td class="user-name">${feat.label}</td>
+          ${users.map(([email, u]) => {
+            const userPerms = permData[email];
+            const defaults = getDefaultPerms(u.roles);
+            const val = userPerms && userPerms[feat.id] !== undefined
+              ? userPerms[feat.id]
+              : (defaults[feat.id] !== false);
+            return `<td><button class="perm-toggle ${val?'on':'off'}"
+              onclick="togglePerm('${email}','${feat.id}',this)"
+              title="${u.name} — ${feat.label}">
+              ${val ? '✓' : ''}
+            </button></td>`;
+          }).join('')}
+        </tr>`;
+      });
+    });
+    tbody.innerHTML = rows;
+  }
+
+  window.togglePerm = async function(email, featId, btn) {
+    if (!permData[email]) {
+      // Initialize with defaults
+      permData[email] = getDefaultPerms(USERS[email].roles);
+    }
+    const current = btn.classList.contains('on');
+    permData[email][featId] = !current;
+    btn.classList.toggle('on', !current);
+    btn.classList.toggle('off', current);
+    btn.textContent = !current ? '✓' : '';
+    try {
+      await setDoc(doc(db,'settings','permissions'), permData);
+      // Re-apply if affecting current user
+      if (email === currentUser.email) applyPermissions();
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
 
   function initFirebase() {
     try {
