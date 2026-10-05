@@ -1011,9 +1011,7 @@
 <!-- HEADER -->
 <header>
   <div class="logo">
-    <span class="logo-badge">AV\NASSIF</span>
-    <span class="logo-text">Project Manager</span>
-    <span style="font-size:10px;color:var(--text3);font-family:var(--mono);opacity:0.7;margin-right:4px;">V1.2.1</span>
+    <span class="logo-badge">AV\NASSIF <span style="font-size:9px;opacity:0.8;font-weight:400;">V1.3.7</span></span>
   </div>
   <div class="header-right">
     <div class="theme-toggle">
@@ -1026,19 +1024,7 @@
       <span>☀️</span>
     </div>
     <div class="live-dot" id="liveStatus">Connecting...</div>
-      <div class="notif-bell-wrap" style="position:relative;">
-      <button class="notif-bell-btn" onclick="toggleNotifPanel()" title="Notifications">
-        🔔
-        <span class="notif-badge" id="notif_badge"></span>
-      </button>
-      <div class="notif-panel" id="notif_panel">
-        <div class="notif-header">
-          <span>🔔 Notifications</span>
-          <button onclick="markAllRead()" style="background:none;border:none;color:var(--accent);font-size:11px;cursor:pointer;">Mark all read</button>
-        </div>
-        <div id="notif_list"><div class="notif-empty">No notifications</div></div>
-      </div>
-    </div>
+      
     <span id="user_name_display" style="font-size:12px;color:var(--text2);font-family:var(--mono);"></span>
       <button onclick="logout()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;">خروج</button>
   </div>
@@ -1377,10 +1363,17 @@
             <option value="ايجار">🚕 إيجار</option>
             <option value="شركة/إيجار">🏢 شركة/إيجار</option>
           </select></div>
-        <div class="field" id="h_driver_field"><label>🚗 السواق</label>
-          <select id="h_car_detail" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;direction:rtl;" onchange="hSelectDriver()">
-            <option value="">— اختار سواق —</option>
+        <div class="field" id="h_driver_field">
+          <label>🚗 عدد السيارات</label>
+          <select id="h_driver_count" onchange="hRenderDriverSelects()"
+            style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;width:100%;direction:rtl;margin-bottom:8px;">
+            <option value="0">— اختار عدد السيارات —</option>
+            <option value="1">1 سيارة</option>
+            <option value="2">2 سيارات</option>
+            <option value="3">3 سيارات</option>
+            <option value="4">4 سيارات</option>
           </select>
+          <div id="h_driver_selects"></div>
         </div>
       </div>
       <div class="field" style="margin-bottom:12px;">
@@ -1418,6 +1411,7 @@
                 <option value="محمد رمضان">محمد رمضان</option>
           <option value="بيشوي عدلي">بيشوي عدلي</option>
           <option value="مينا سامي">مينا سامي</option>
+               <option value="مصطفى عادل">مصطفى عادل</option>
           <option value="إيهاب حشمت">إيهاب حشمت</option>
           <option value="نادر فايز">نادر فايز</option>
         </select>
@@ -1496,6 +1490,7 @@
                 <option value="كيرلس عادل">كيرلس عادل</option>
           <option value="بيشوي عدلي">بيشوي عدلي</option>
           <option value="مينا سامي">مينا سامي</option>
+                <option value="مصطفى عادل">مصطفى عادل</option>
           <option value="إيهاب حشمت">إيهاب حشمت</option>
           <option value="نادر فايز">نادر فايز</option>
         </select>
@@ -1528,7 +1523,8 @@
           <option value="محمد رمضان">محمد رمضان</option>
           <option value="بيشوي عدلي">بيشوي عدلي</option>
           <option value="مينا سامي">مينا سامي</option>
-                <option value="كيرلس عادل">كيرلس عادل</option>
+                <option value="مصطفى عادل">مصطفى عادل</option>
+          <option value="كيرلس عادل">كيرلس عادل</option>
           <option value="إيهاب حشمت">إيهاب حشمت</option>
           <option value="نادر فايز">نادر فايز</option>
         </select>
@@ -1562,6 +1558,7 @@
           <option value="محمد رمضان">محمد رمضان</option>
           <option value="بيشوي عدلي">بيشوي عدلي</option>
           <option value="مينا سامي">مينا سامي</option>
+                <option value="مصطفى عادل">مصطفى عادل</option>
           <option value="إيهاب حشمت">إيهاب حشمت</option>
           <option value="نادر فايز">نادر فايز</option>
         </select>
@@ -2911,7 +2908,8 @@
     h_pending.push({
       project, number,
       car: document.getElementById('h_car').value,
-      carDetail: carDetailEl ? carDetailEl.value : '',
+      drivers: hGetDrivers(),
+      carDetail: hGetDrivers()[0] || (carDetailEl ? carDetailEl.value : ''),
       engineers: [...h_lists.eng], technicians: [...h_lists.tech],
       tasks: hGetTasks(),
       coord: document.getElementById('h_coord').value.trim(),
@@ -2927,8 +2925,10 @@
     ['h_project','h_number','h_car_detail','h_coord','h_depart','h_date_from','h_date_to','h_support_name','h_support_phone'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
     const sp = document.getElementById('h_support_phone'); if(sp) sp.style.display='none';
     document.getElementById('h_car').selectedIndex = 0;
-    h_lists.eng = []; h_lists.tech = []; h_lists.support = [];
-    hRenderTags('eng'); hRenderTags('tech'); hRenderSupportTags();
+    const _dc = document.getElementById('h_driver_count'); if(_dc) _dc.value='0';
+    const _dw = document.getElementById('h_driver_selects'); if(_dw) _dw.innerHTML='';
+    h_lists.eng = []; h_lists.tech = []; h_lists.support = []; h_lists.drivers = [];
+    hRenderTags('eng'); hRenderTags('tech'); hRenderSupportTags(); hRenderDriverTags();
     document.getElementById('h_tasks_wrap').innerHTML = '';
   };
 
@@ -3038,6 +3038,7 @@
     'k.ibrahim@nassifteam.com':   { password: '0MExV!$H', roles: [4], name: 'كيرلس ابراهيم' },
     'm.ramadan@nassifteam.com':   { password: 'cwF#0cCk', roles: [4], name: 'محمد رمضان' },
     'k.adel@nassifteam.com':      { password: 'c0uqblot', roles: [4], name: 'كيرلس عادل' },
+    'n.fayez@nassifteam.com':     { password: 'oytb6!p0', roles: [4], name: 'نادر فايز' },
     'm.samy@nassifteam.com':      { password: 'y3KRo$%5', roles: [4], name: 'مينا سامي' },
   };
 
@@ -3565,6 +3566,7 @@
   function driversStartListener() {
     onSnapshot(doc(db,'settings','drivers'), snap => {
       driversData = snap.exists() ? (snap.data().list || []) : [];
+    window._driversData = driversData.map(d => typeof d === 'object' ? d : { name: d, phone: '' });
       renderDriversList();
       hPopulateDrivers();
     });
@@ -3611,9 +3613,46 @@
     if (current) sel.value = current;
   }
 
-  window.hSelectDriver = function() {
-    // Just selecting updates the value automatically
+  window.hRenderDriverSelects = function() {
+    const count = parseInt(document.getElementById('h_driver_count')?.value) || 0;
+    const wrap  = document.getElementById('h_driver_selects');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const div = document.createElement('div');
+      div.style.marginBottom = '8px';
+      const label = document.createElement('label');
+      label.style.cssText = 'font-size:12px;color:var(--text2);margin-bottom:4px;display:block;';
+      label.textContent = '🚗 السيارة ' + (i + 1);
+      const sel = document.createElement('select');
+      sel.id = 'h_driver_' + i;
+      sel.style.cssText = 'background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;width:100%;direction:rtl;';
+      sel.innerHTML = '<option value="">— اختار سواق —</option>';
+      (window._driversData || []).forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.name + (d.phone ? ' — ' + d.phone : '');
+        opt.textContent = d.name + (d.phone ? '  📞 ' + d.phone : '');
+        sel.appendChild(opt);
+      });
+      div.appendChild(label);
+      div.appendChild(sel);
+      wrap.appendChild(div);
+    }
   };
+
+  function hGetDrivers() {
+    const count = parseInt(document.getElementById('h_driver_count')?.value) || 0;
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      const sel = document.getElementById('h_driver_' + i);
+      if (sel && sel.value) result.push(sel.value);
+    }
+    return result;
+  }
+
+  window.hSelectDriver = function() { /* legacy no-op */ };
+
+
 
   window.hCarChanged = function() {
     const car = document.getElementById('h_car').value;
@@ -3693,7 +3732,8 @@
     { email:'a.sayed@nassifteam.com',    name:'أيمن سيد' },
     { email:'k.ibrahim@nassifteam.com',  name:'كيرلس ابراهيم' },
     { email:'m.ramadan@nassifteam.com',  name:'محمد رمضان' },
-       { email:'k.adel@nassifteam.com',     name:'كيرلس عادل' },
+    { email:'k.adel@nassifteam.com',     name:'كيرلس عادل' },
+      { email:'n.fayez@nassifteam.com',     name:'نادر فايز' },
     { email:'m.samy@nassifteam.com',     name:'مينا سامي' },
   ];
 
@@ -4248,6 +4288,7 @@
 
     (data.entries||[]).forEach((e,ei) => {
       const carIcon = {مواصلات:'🚌',Sedan:'🚗',Van:'🚐',ايجار:'🚕'}[e.car]||'🚘';
+      const driverList = e.drivers && e.drivers.length ? e.drivers : (e.carDetail ? [e.carDetail] : []);
       const needsCar = e.car !== 'مواصلات';
       const confirmed = confirmData[ei];
       // Check if project is registered - if not, it's external support
@@ -4260,16 +4301,8 @@
       const driverParts = e.carDetail ? e.carDetail.split(' — ') : [];
       const driverPhone = driverParts.length > 1 ? driverParts[driverParts.length-1].trim() : '';
       const driverName  = e.carDetail || '';
-      html += '<div class="haraka-row">'+carIcon+' '+esc(e.car);
-      if (e.carDetail) {
-        html += ' — '+esc(driverName);
-        if (driverPhone) {
-          html += ' <button onclick="navigator.clipboard.writeText(\'' + driverPhone.replace(/'/g,"\'") + '\').then(()=>toast(\'✅ تم نسخ الرقم\',\'success\'))" '
-               +  'title="نسخ رقم السواق" '
-               +  'style="background:rgba(0,194,255,0.1);border:1px solid rgba(0,194,255,0.25);color:var(--accent);border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;margin-right:4px;">📋</button>';
-        }
-      }
-      html += '</div>';
+      const _dList = e.drivers && e.drivers.length ? e.drivers : (e.carDetail ? [e.carDetail] : []);
+      html += '<div class="haraka-row">'+carIcon+' '+esc(e.car)+(_dList.length?' — <span style="color:var(--text2)">'+_dList.map(d=>esc(d)).join(' | ')+'</span>':'')+'</div>';
       if (e.engineers&&e.engineers.length) { html+='<div class="haraka-row">'; e.engineers.forEach(n=>{html+='<span class="haraka-person engineer">👨🏻‍💻 م '+esc(n)+'</span>';}); html+='</div>'; }
       if (e.technicians&&e.technicians.length) { html+='<div class="haraka-row">'; e.technicians.forEach(n=>{html+='<span class="haraka-person">👷🏻‍♂️ '+esc(n)+'</span>';}); html+='</div>'; }
       if (e.tasks&&e.tasks.length) { html+='<div class="haraka-tasks">'; e.tasks.forEach(t=>{html+='<div class="haraka-task"><span>▪️</span><span>'+esc(t)+'</span></div>';}); html+='</div>'; }
@@ -4376,24 +4409,42 @@
       const e = snap.data().entries[entryIdx];
       if (!e) return;
       // Pre-fill the form
-      document.getElementById('h_project').value = e.project || '';
-      document.getElementById('h_number').value  = e.number  || '';
-      document.getElementById('h_car_detail').value = e.carDetail || '';
-      document.getElementById('h_coord').value   = e.coord  || '';
-      document.getElementById('h_depart').value  = e.depart || '';
-      const dfEl = document.getElementById('h_date_from'); if(dfEl) dfEl.value = e.dateFrom || '';
-      const dtEl = document.getElementById('h_date_to');   if(dtEl) dtEl.value = e.dateTo   || '';
+      const _setV = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+      _setV('h_project', e.project || '');
+      _setV('h_number', e.number || '');
+      _setV('h_car_detail', e.carDetail || '');
+      _setV('h_coord', e.coord || '');
+      _setV('h_depart', e.depart || '');
+      _setV('h_date_from', e.dateFrom || dateStr);
+      _setV('h_date_to', e.dateTo || '');
       // Set car
       const carSel = document.getElementById('h_car');
-      for (let i=0; i<carSel.options.length; i++) {
+      for (let i=0; carSel && i<carSel.options.length; i++) {
         if (carSel.options[i].value === e.car) { carSel.selectedIndex = i; break; }
       }
-      // Set engineers, techs & support
+      // Restore drivers
+      const _editDrivers = e.drivers && e.drivers.length ? e.drivers : (e.carDetail ? [e.carDetail] : []);
+      const _dc2 = document.getElementById('h_driver_count');
+      if (_dc2 && _editDrivers.length) {
+        _dc2.value = String(_editDrivers.length);
+        hRenderDriverSelects();
+        _editDrivers.forEach((d, i) => {
+          const sel = document.getElementById('h_driver_' + i);
+          if (!sel) return;
+          for (let o=0; o<sel.options.length; o++) {
+            if (sel.options[o].value === d) { sel.selectedIndex = o; return; }
+          }
+          const opt = document.createElement('option');
+          opt.value = d; opt.textContent = d; sel.appendChild(opt); sel.value = d;
+        });
+      }
+      // Set engineers, techs, support & drivers
       h_lists.eng     = [...(e.engineers||[])];
       h_lists.tech    = [...(e.technicians||[])];
       h_lists.support = [...(e.support||[])];
+      h_lists.drivers = [...(e.drivers||[])]; if (e.carDetail && !h_lists.drivers.length) h_lists.drivers = [e.carDetail];
       hRenderTags('eng'); hRenderTags('tech');
-      hRenderSupportTags();
+      hRenderSupportTags(); hRenderDriverTags();
       // Set tasks
       document.getElementById('h_tasks_wrap').innerHTML = '';
       (e.tasks||[]).forEach(t => {
@@ -4416,7 +4467,7 @@
       } catch(logErr) { console.warn('Edit log error:', logErr); }
       toast('✏️ تم تحميل البيانات — عدّل وأضف للقائمة', 'success');
       // Scroll to top of haraka panel
-      document.getElementById('panel-haraka').scrollTop = 0;
+      const _hp = document.getElementById('panel-haraka'); if (_hp) _hp.scrollTop = 0;
       window.scrollTo(0,0);
     } catch(err) { toast('Error: '+err.message,'error'); }
   };
@@ -4495,6 +4546,14 @@
     if (ph) { ph.value = ''; ph.style.display = 'none'; }
     hRenderSupportTags();
   };
+
+  function hRenderDriverTags() {
+    const wrap = document.getElementById('h_drivers_wrap');
+    if (!wrap) return;
+    wrap.innerHTML = (h_lists.drivers||[]).map((d, i) =>
+      '<div class="h-tag">🚗 ' + esc(d) + '<button onclick="h_lists.drivers.splice(' + i + ',1);hRenderDriverTags()">×</button></div>'
+    ).join('');
+  }
 
   function hRenderSupportTags() {
     const wrap = document.getElementById('h_support_wrap');
