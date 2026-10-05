@@ -1013,6 +1013,7 @@
   <div class="logo">
     <span class="logo-badge">AV\NASSIF</span>
     <span class="logo-text">Project Manager</span>
+    <span style="font-size:10px;color:var(--text3);font-family:var(--mono);opacity:0.7;margin-right:4px;">V1.2.1</span>
   </div>
   <div class="header-right">
     <div class="theme-toggle">
@@ -1442,13 +1443,19 @@
       <div class="field" style="margin-bottom:12px;">
         <label>🆘 الدعم</label>
         <div style="display:flex;gap:8px;margin-bottom:6px;">
-          <input type="text" id="h_support_name" placeholder="اسم + رقم" 
+          <select id="h_support_contact_select"
+            style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;direction:rtl;">
+            <option value="">— اختار من الدعم —</option>
+          </select>
+          <button onclick="hAddSupportFromList()" class="btn btn-ghost" style="padding:7px 12px;font-size:12px;white-space:nowrap;">+ إضافة</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <input type="text" id="h_support_name" placeholder="أو اكتب اسم"
             style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;direction:rtl;"
             oninput="hSupportNameInput()">
-          <input type="text" id="h_support_phone" placeholder="01XXXXXXXXX"
-            style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;display:none;"
-            id="h_support_phone">
-          <button onclick="hAddSupport()" class="btn btn-ghost" style="padding:7px 12px;font-size:12px;">+ إضافة</button>
+          <input type="text" id="h_support_phone" placeholder="رقم التليفون"
+            style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;display:none;">
+          <button onclick="hAddSupport()" class="btn btn-ghost" style="padding:7px 12px;font-size:12px;white-space:nowrap;">+ يدوي</button>
         </div>
         <div class="h-tags-box" id="h_support_wrap" style="min-height:32px;">
           <input class="h-bare-input" id="h_support_input" style="display:none;">
@@ -1641,6 +1648,10 @@
         style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
         🚗 السواقين
       </button>
+      <button onclick="settingsSubTab('support_contacts')" id="settingsSubBtn_support_contacts"
+        style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
+        🆘 الدعم
+      </button>
       <button onclick="settingsSubTab('profiles')" id="settingsSubBtn_profiles"
         style="background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;">
         👤 بيانات الموظفين
@@ -1734,6 +1745,29 @@
             <thead id="perm_matrix_head"></thead>
             <tbody id="perm_matrix_body"></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB TAB: SUPPORT CONTACTS -->
+    <div id="settings_section_support_contacts" style="display:none;">
+      <div class="settings-section">
+        <div class="settings-title">🆘 جهات الدعم</div>
+        <div id="support_contacts_list" style="margin-bottom:16px;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;">
+          <div class="field"><label>الاسم</label>
+            <input type="text" id="new_support_name" placeholder="اسم الشخص"
+              style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;direction:rtl;width:100%;">
+          </div>
+          <div class="field"><label>رقم التليفون</label>
+            <input type="text" id="new_support_phone" placeholder="01XXXXXXXXX"
+              style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;direction:rtl;width:100%;">
+          </div>
+          <div class="field"><label>التيم</label>
+            <input type="text" id="new_support_team" placeholder="مثال: Crestron / AV"
+              style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;direction:rtl;width:100%;">
+          </div>
+          <button onclick="addSupportContact()" class="btn btn-primary" style="padding:10px 18px;">+ إضافة</button>
         </div>
       </div>
     </div>
@@ -2885,6 +2919,7 @@
       support: [...(h_lists.support||[])],
       dateFrom, dateTo,
     });
+    console.log('Entry added, support:', h_lists.support, 'in pending:', h_pending[h_pending.length-1]?.support);
     hClearEntry(); hRenderPending(); toast('تمت الإضافة ✅', 'success');
   };
 
@@ -2892,8 +2927,8 @@
     ['h_project','h_number','h_car_detail','h_coord','h_depart','h_date_from','h_date_to','h_support_name','h_support_phone'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
     const sp = document.getElementById('h_support_phone'); if(sp) sp.style.display='none';
     document.getElementById('h_car').selectedIndex = 0;
-    h_lists.eng = []; h_lists.tech = [];
-    hRenderTags('eng'); hRenderTags('tech'); hRenderTags('support');
+    h_lists.eng = []; h_lists.tech = []; h_lists.support = [];
+    hRenderTags('eng'); hRenderTags('tech'); hRenderSupportTags();
     document.getElementById('h_tasks_wrap').innerHTML = '';
   };
 
@@ -3086,6 +3121,7 @@
     window.applyRoles();
     notifStartListener();
     permStartListener();
+    supportContactsStartListener();
   };
 
   window.checkStoredLogin = function() {
@@ -3501,7 +3537,7 @@
   // SETTINGS SUB-TABS
   // ══════════════════════════════════════
   window.settingsSubTab = function(tab) {
-    ['techs','drivers','profiles','matrix','users'].forEach(t => {
+    ['techs','drivers','support_contacts','profiles','matrix','users'].forEach(t => {
       const sec = document.getElementById('settings_section_'+t);
       const btn = document.getElementById('settingsSubBtn_'+t);
       if (sec) sec.style.display = t===tab ? '' : 'none';
@@ -4129,6 +4165,38 @@
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
 
+
+  window.hCopyFeed = async function(dateStr) {
+    try {
+      const docRef = doc(db,'haraka',dateStr);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) { toast('مفيش حركة لهذا اليوم','error'); return; }
+      const data = snap.data();
+      let text = hFmtDateAr(data.date) + '\n\n';
+
+      (data.entries||[]).forEach((e, i) => {
+        text += '🏗️ ' + (e.project||'') + (e.number ? ' — ' + e.number : '') + '\n';
+        text += (e.car==='مواصلات' ? '🚌 مواصلات' : '🚘 ' + e.car + (e.carDetail ? ' — ' + e.carDetail : '')) + '\n';
+        if (e.engineers&&e.engineers.length)   text += '👨🏻‍💻 م ' + e.engineers.join(' / م ') + '\n';
+        if (e.technicians&&e.technicians.length) text += '👷🏻‍♂️ ' + e.technicians.join(' / ') + '\n';
+        if (e.tasks&&e.tasks.length) e.tasks.forEach(t => { text += '▪️ ' + t + '\n'; });
+        if (e.coord)   text += '📞 التنسيق مع ' + e.coord + '\n';
+        if (e.depart)  text += '🕐 التحرك الساعة ' + e.depart + '\n';
+        if (e.support&&e.support.length) {
+          text += '🆘 الدعم: ' + e.support.map(s=>s.split('||')[0]).join(' / ') + '\n';
+        }
+        text += '\n';
+      });
+
+      if (data.office&&data.office.length)   text += '🏢 Office: ' + data.office.join(' — ') + '\n';
+      if (data.vacation&&data.vacation.length) text += '😴 إجازة: ' + data.vacation.join(' — ') + '\n';
+      if (data.sick&&data.sick.length)       text += '🤒 مرضية: ' + data.sick.join(' — ') + '\n';
+
+      await navigator.clipboard.writeText(text.trim());
+      toast('✅ تم نسخ الحركة!', 'success');
+    } catch(e) { toast('Error: '+e.message,'error'); }
+  };
+
   window.hSearch = function() { const v = document.getElementById('h_date').value; if(v) hLoadDay(v); else toast('اختار تاريخ أول','error'); };
 
   let hUnsubscribe = null;
@@ -4170,7 +4238,13 @@
       return;
     }
     const confirmData = data.confirmations || {};
-    let html = '<div class="haraka-date-banner">'+hFmtDateAr(data.date)+'</div><div class="haraka-feed">';
+    let html = '<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;">' +
+      '<div class="haraka-date-banner" style="margin-bottom:0;flex:1;">'+hFmtDateAr(data.date)+'</div>' +
+      (currentUser && currentUser.roles.some(r=>[1,2].includes(r)) ?
+        '<button onclick="hCopyFeed(\'' + dateStr + '\')" title="نسخ الحركة" style="background:rgba(0,194,255,0.1);border:1px solid rgba(0,194,255,0.3);color:var(--accent);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap;">📋 نسخ</button>'
+        : '') +
+      '</div>' +
+      '<div class="haraka-feed">';
 
     (data.entries||[]).forEach((e,ei) => {
       const carIcon = {مواصلات:'🚌',Sedan:'🚗',Van:'🚐',ايجار:'🚕'}[e.car]||'🚘';
@@ -4206,9 +4280,10 @@
         html += '<div class="haraka-row" style="flex-wrap:wrap;gap:4px;">🆘 الدعم: ';
         e.support.forEach(val => {
           const parts = val.split('||');
-          const sName = parts[0]; const sPhone = parts[1]||'';
-          html += '<span style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#a855f7;border-radius:20px;padding:2px 8px;font-size:12px;display:inline-flex;align-items:center;gap:4px;">';
+          const sName = parts[0]; const sPhone = parts[1]||''; const sTeam = parts[2]||'';
+          html += '<span style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#a855f7;border-radius:20px;padding:2px 10px;font-size:12px;display:inline-flex;align-items:center;gap:4px;">';
           html += '👤 '+esc(sName);
+          if (sTeam) html += ' <span style="font-size:10px;opacity:0.7;background:rgba(168,85,247,0.15);border-radius:4px;padding:1px 5px;">'+esc(sTeam)+'</span>';
           if (sPhone) {
             html += ' 📞 '+esc(sPhone);
             html += ' <button onclick="navigator.clipboard.writeText(\'' + sPhone + '\').then(()=>toast(\'✅ تم نسخ الرقم\',\'success\'))" style="background:rgba(255,255,255,0.15);border:none;color:#a855f7;border-radius:4px;padding:1px 5px;font-size:10px;cursor:pointer;">📋</button>';
@@ -4306,15 +4381,19 @@
       document.getElementById('h_car_detail').value = e.carDetail || '';
       document.getElementById('h_coord').value   = e.coord  || '';
       document.getElementById('h_depart').value  = e.depart || '';
+      const dfEl = document.getElementById('h_date_from'); if(dfEl) dfEl.value = e.dateFrom || '';
+      const dtEl = document.getElementById('h_date_to');   if(dtEl) dtEl.value = e.dateTo   || '';
       // Set car
       const carSel = document.getElementById('h_car');
       for (let i=0; i<carSel.options.length; i++) {
         if (carSel.options[i].value === e.car) { carSel.selectedIndex = i; break; }
       }
-      // Set engineers & techs
-      h_lists.eng  = [...(e.engineers||[])];
-      h_lists.tech = [...(e.technicians||[])];
-      hRenderTags('eng'); hRenderTags('tech'); hRenderTags('support');
+      // Set engineers, techs & support
+      h_lists.eng     = [...(e.engineers||[])];
+      h_lists.tech    = [...(e.technicians||[])];
+      h_lists.support = [...(e.support||[])];
+      hRenderTags('eng'); hRenderTags('tech');
+      hRenderSupportTags();
       // Set tasks
       document.getElementById('h_tasks_wrap').innerHTML = '';
       (e.tasks||[]).forEach(t => {
@@ -4385,6 +4464,25 @@
     if (phoneField) phoneField.style.display = name ? 'block' : 'none';
   };
 
+
+  window.hAddSupportFromList = function() {
+    const sel = document.getElementById('h_support_contact_select');
+    if (!sel || sel.value === '') return;
+    const idx = parseInt(sel.value);
+    const s = supportContactsData[idx];
+    if (!s) return;
+    // Format: name||phone||team
+    const val = s.name + '||' + s.phone + (s.team ? '||' + s.team : '');
+    if (!h_lists.support) h_lists.support = [];
+    // Avoid duplicates
+    if (h_lists.support.some(x => x.startsWith(s.name + '||'))) {
+      toast('الدعم ده موجود بالفعل', 'error'); return;
+    }
+    h_lists.support.push(val);
+    sel.value = '';
+    hRenderSupportTags();
+  };
+
   window.hAddSupport = function() {
     const name  = document.getElementById('h_support_name').value.trim();
     const phone = document.getElementById('h_support_phone') ? document.getElementById('h_support_phone').value.trim() : '';
@@ -4407,9 +4505,10 @@
       const parts = val.split('||');
       const name  = parts[0];
       const phone = parts[1] || '';
+      const team  = parts[2] || '';
       const tag = document.createElement('div');
       tag.className = 'h-tag';
-      tag.innerHTML = '🆘 ' + name + (phone ? ' 📞 ' + phone : '');
+      tag.innerHTML = '🆘 ' + name + (team ? ' <span style="font-size:10px;opacity:0.7;">('+team+')</span>' : '') + (phone ? ' 📞 ' + phone : '');
       const btn = document.createElement('button');
       btn.textContent = '×';
       btn.onclick = (()=>{ const idx=i; return ()=>{ h_lists.support.splice(idx,1); hRenderSupportTags(); }; })();
@@ -5082,6 +5181,65 @@
       if (email === currentUser.email) applyPermissions();
     } catch(e) { toast('Error: '+e.message,'error'); }
   };
+
+
+  // ══════════════════════════════════════
+  // SUPPORT CONTACTS
+  // ══════════════════════════════════════
+  let supportContactsData = [];
+
+  function supportContactsStartListener() {
+    onSnapshot(doc(db,'settings','support_contacts'), snap => {
+      supportContactsData = snap.exists() ? (snap.data().list || []) : [];
+      renderSupportContactsList();
+      hPopulateSupportContacts();
+    });
+  }
+
+  function renderSupportContactsList() {
+    const el = document.getElementById('support_contacts_list');
+    if (!el) return;
+    if (!supportContactsData.length) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--text3);padding:8px;">مفيش جهات دعم متسجلة</div>';
+      return;
+    }
+    el.innerHTML = supportContactsData.map((s,i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;margin-bottom:8px;">
+        <div style="direction:rtl;">
+          <span style="font-weight:600;">🆘 ${esc(s.name)}</span>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--accent);margin-right:12px;">📞 ${esc(s.phone)}</span>
+          <span style="font-size:12px;color:var(--text3);background:var(--bg);border:1px solid var(--border2);border-radius:4px;padding:1px 8px;">${esc(s.team||'')}</span>
+        </div>
+        <button onclick="removeSupportContact(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;">×</button>
+      </div>
+    `).join('');
+  }
+
+  window.addSupportContact = async function() {
+    const name  = document.getElementById('new_support_name').value.trim();
+    const phone = document.getElementById('new_support_phone').value.trim();
+    const team  = document.getElementById('new_support_team').value.trim();
+    if (!name || !phone) { toast('اكتب الاسم والتليفون', 'error'); return; }
+    supportContactsData.push({ name, phone, team });
+    ['new_support_name','new_support_phone','new_support_team'].forEach(id => document.getElementById(id).value = '');
+    await setDoc(doc(db,'settings','support_contacts'), { list: supportContactsData });
+    toast('✅ تمت الإضافة', 'success');
+  };
+
+  window.removeSupportContact = async function(i) {
+    supportContactsData.splice(i,1);
+    await setDoc(doc(db,'settings','support_contacts'), { list: supportContactsData });
+    toast('تم الحذف', 'success');
+  };
+
+  function hPopulateSupportContacts() {
+    const sel = document.getElementById('h_support_contact_select');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— اختار من الدعم —</option>' +
+      supportContactsData.map((s,i) =>
+        `<option value="${i}">${esc(s.name)} (${esc(s.team||'')})</option>`
+      ).join('');
+  }
 
   function initFirebase() {
     try {
